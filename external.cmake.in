@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.11)
+
+project(parafields-external NONE)
+
+include(ExternalProject)
+
+ExternalProject_add(fftw3
+  URL http://www.fftw.org/fftw-3.3.10.tar.gz
+  URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
+  SOURCE_DIR ${CMAKE_BINARY_DIR}/fftw3
+  CONFIGURE_COMMAND
+    ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/fftw3
+    #${CMAKE_COMMAND} -E env CC=${CMAKE_BINARY_DIR}/openmpi-inst/bin/mpicc
+    ./configure
+      --enable-shared --disable-static
+      --prefix=${CMAKE_BINARY_DIR}/fftw3-inst
+      --enable-mpi
+  INSTALL_COMMAND make install
+  INSTALL_DIR ${CMAKE_BINARY_DIR}/fftw3-inst
+  BUILD_IN_SOURCE ON
+  USES_TERMINAL_DOWNLOAD 1
+  USES_TERMINAL_CONFIGURE 1
+  USES_TERMINAL_BUILD 1
+)
+
+ExternalProject_add(dune-common
+  GIT_REPOSITORY https://gitlab.dune-project.org/core/dune-common.git
+  GIT_TAG releases/2.7
+  SOURCE_DIR ${CMAKE_BINARY_DIR}/dune-common
+  UPDATE_COMMAND ""
+  USES_TERMINAL_DOWNLOAD 1
+  USES_TERMINAL_CONFIGURE 1
+  USES_TERMINAL_BUILD 1
+  CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dune-inst
+)
+
+ExternalProject_add(core
+  GIT_REPOSITORY https://github.com/parafields/parafields-core.git
+  GIT_TAG main
+  SOURCE_DIR ${CMAKE_BINARY_DIR}/core
+  UPDATE_COMMAND ""
+  USES_TERMINAL_DOWNLOAD 1
+  USES_TERMINAL_CONFIGURE 1
+  USES_TERMINAL_BUILD 1
+  CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=Release
+    -DFFTW_ROOT=${CMAKE_BINARY_DIR}/fftw3-inst
+    -Ddune-common_ROOT=${CMAKE_BINARY_DIR}/dune-inst
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/core-inst
+  DEPENDS dune-common fftw3
+)
