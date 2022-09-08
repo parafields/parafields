@@ -4,4 +4,5 @@ include LICENSE.md
 include pyproject.toml
 include setup.py
 
+graft lib
 graft src

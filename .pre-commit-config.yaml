@@ -43,3 +43,12 @@ repos:
     hooks:
       - id: check-github-workflows
       - id: check-readthedocs
+
+  # Format C++ code with Clang-Format - automatically applying the changes
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v14.0.6
+    hooks:
+      - id: clang-format
+        args:
+        - --style=Mozilla
+        exclude: ^ext/

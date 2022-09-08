@@ -30,7 +30,9 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: BSD License",
 ]
-dependencies = []
+dependencies = [
+    "mpi4py",
+]
 
 [project.optional-dependencies]
 tests = [
