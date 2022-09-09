@@ -9,4 +9,4 @@ def test_generate(covariance):
         "grid": {"extensions": (1, 1), "cells": (10, 10)},
         "stochastic": {"variance": 1, "covariance": covariance, "corrLength": 0.05},
     }
-    field = generate(config)
+    field = generate_field(config)

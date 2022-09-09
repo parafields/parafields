@@ -109,6 +109,10 @@
           "type": "array"
         }
       },
+      "required": [
+        "cells",
+        "extensions"
+      ],
       "title": "Grid",
       "type": "object"
     },
@@ -173,14 +177,26 @@
     "slope": {
       "properties": {
         "mean": {
-          "default": 0.5,
+          "default": [
+            0.5,
+            0.5
+          ],
+          "items": {
+            "type": "number"
+          },
           "title": "Mean of slope trend component",
-          "type": "number"
+          "type": "array"
         },
         "variance": {
-          "default": 0.01,
+          "default": [
+            0.01,
+            0.01
+          ],
+          "items": {
+            "type": "number"
+          },
           "title": "Variance of slope trend component",
-          "type": "number"
+          "type": "array"
         }
       },
       "title": "Mean slope trend component of the field",
@@ -241,9 +257,17 @@
           "type": "number"
         }
       },
+      "required": [
+        "variance",
+        "covariance"
+      ],
       "title": "Stochastic part of field",
       "type": "object"
     }
   },
+  "required": [
+    "grid",
+    "stochastic"
+  ],
   "type": "object"
 }
