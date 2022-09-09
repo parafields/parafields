@@ -27,6 +27,23 @@ public:
   using Domain = Dune::FieldVector<DF, dim>;
 };
 
+#define GENERATE_FIELD_DIM(dim)                                                \
+  using RandomField##dim##D =                                                  \
+    Dune::RandomField::RandomField<GridTraits<double, double, dim>>;           \
+  py::class_<RandomField##dim##D> field##dim##d(m, "RandomField" #dim "D");    \
+  field##dim##d.def(py::init<Dune::ParameterTree>());                          \
+  field##dim##d.def("generate",                                                \
+                    [](RandomField##dim##D& self) { self.generate(); });       \
+  field##dim##d.def(                                                           \
+    "probe",                                                                   \
+    [](const RandomField##dim##D& self, const py::array_t<double>& pos) {      \
+      Dune::FieldVector<double, 1> out;                                        \
+      Dune::FieldVector<double, dim> apos;                                     \
+      std::copy(pos.data(), pos.data() + dim, apos.begin());                   \
+      self.evaluate(apos, out);                                                \
+      return out[0];                                                           \
+    });
+
 PYBIND11_MODULE(_parafields, m)
 {
   m.doc() =
@@ -41,24 +58,10 @@ PYBIND11_MODULE(_parafields, m)
               self[key] = value;
             });
 
-  // Expose the 2D RandomField class
-  using RandomField2D =
-    Dune::RandomField::RandomField<GridTraits<double, double, 2>>;
-  py::class_<RandomField2D> field2d(m, "RandomField2D");
-  field2d.def(py::init<Dune::ParameterTree>());
-
-  // The (lazy) method for random field generation
-  field2d.def("generate", [](RandomField2D& self) { self.generate(); });
-
-  // A method to evaluate at a given coordinate
-  field2d.def("probe",
-              [](const RandomField2D& self, const py::array_t<double>& pos) {
-                Dune::FieldVector<double, 1> out;
-                Dune::FieldVector<double, 2> apos;
-                std::copy(pos.data(), pos.data() + 2, apos.begin());
-                self.evaluate(apos, out);
-                return out[0];
-              });
+  // Expose the RandomField template instantiations
+  GENERATE_FIELD_DIM(1)
+  GENERATE_FIELD_DIM(2)
+  GENERATE_FIELD_DIM(3)
 }
 
 } // namespace parafields
