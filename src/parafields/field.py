@@ -1,4 +1,7 @@
 import collections.abc
+import json
+import jsonschema
+import os
 import parafields._parafields as _parafields
 
 
@@ -19,6 +22,19 @@ def dict_to_parameter_tree(data, tree=_parafields.ParameterTree(), prefix=""):
                 v = " ".join([str(x) for x in v])
             tree.set(prefix + k, str(v))
     return tree
+
+
+def validate_config(config):
+    """Validate the given configuration against the provided schema"""
+    # Load the schema file shipped with parafields
+    schema_file = os.path.join(os.path.dirname(__file__), "schema.json")
+    with open(schema_file, "r") as f:
+        schema = json.load(f)
+
+    # Validate the given config
+    jsonschema.validate(instance=config, schema=schema)
+
+    return config
 
 
 def generate(config={}):

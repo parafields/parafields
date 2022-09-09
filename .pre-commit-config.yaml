@@ -29,6 +29,12 @@ repos:
       - id: check-toml
       # Unify file endings
       - id: end-of-file-fixer
+      # Check validity of JSON files
+      - id: check-json
+      # Format JSON files consistently
+      - id: pretty-format-json
+        args:
+          - --autofix
 
   # CMake Formatting/Linting Utility
   - repo: https://github.com/cheshirekow/cmake-format-precommit
@@ -52,3 +58,4 @@ repos:
         args:
         - --style=Mozilla
         exclude: ^ext/
+        types_or: [c++]

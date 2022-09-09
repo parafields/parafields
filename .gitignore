@@ -1,3 +1,5 @@
+.vscode
+
 # Typical build directories
 build
 _skbuild

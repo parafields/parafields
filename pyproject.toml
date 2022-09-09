@@ -31,13 +31,19 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
 ]
 dependencies = [
+    "jsonschema<4",
     "mpi4py",
+    "numpy",
 ]
 
 [project.optional-dependencies]
+jupyter = [
+    "ipywidgets-jsonschema",
+]
 tests = [
     "pytest",
 ]
+
 
 # NB: Setuptools-specific build options are currently still stored
 #     in setup.py, as scikit-build is not (yet) supporting PEP621.
