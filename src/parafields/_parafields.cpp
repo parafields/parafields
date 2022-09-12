@@ -1,11 +1,13 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <dune/common/fvector.hh>
 
 #include <parafields/python.hpp>
 #include <parafields/randomfield.hh>
 
+#include <memory>
 #include <string>
 
 namespace py = pybind11;
@@ -42,7 +44,18 @@ public:
       std::copy(pos.data(), pos.data() + dim, apos.begin());                   \
       self.evaluate(apos, out);                                                \
       return out[0];                                                           \
-    });
+    });                                                                        \
+                                                                               \
+  field##dim##d.def("eval", [](const RandomField##dim##D& self) {              \
+    std::array<unsigned int, dim> size;                                        \
+    std::vector<Dune::FieldVector<double, 1>> out;                             \
+    self.bulkEvaluate(out, size);                                              \
+    std::array<std::size_t, dim> strides;                                      \
+    strides[0] = sizeof(double);                                               \
+    for (std::size_t i = 1; i < dim; ++i)                                      \
+      strides[i] = strides[i - 1] * size[i - 1];                               \
+    return py::array(py::dtype("double"), size, strides, out[0].data());       \
+  });
 
 PYBIND11_MODULE(_parafields, m)
 {
