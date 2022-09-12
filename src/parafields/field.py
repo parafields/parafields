@@ -1,8 +1,11 @@
 import collections.abc
 import json
 import jsonschema
+import numpy as np
 import os
 import parafields._parafields as _parafields
+
+from matplotlib import pyplot as plt
 
 
 def is_iterable(x):
@@ -36,18 +39,70 @@ def load_schema():
 def validate_config(config):
     """Validate the given configuration against the provided schema"""
 
-    # Validate the given config
+    # Validate the given config against the schema
     schema = load_schema()
     jsonschema.validate(instance=config, schema=schema)
+
+    # Perform some additional validations not part of the schema
+    assert len(config["grid"]["extensions"]) == len(config["grid"]["cells"])
+
     return config
 
 
-def generate_field(config):
-    """Generate a random field"""
-    config = validate_config(config)
-    dim = len(config["grid"]["extensions"])
-    FieldType = getattr(_parafields, f"RandomField{dim}D")
-    return FieldType(dict_to_parameter_tree(config))
+def generate_field(
+    cells=(512, 512),
+    extensions=(1.0, 1.0),
+    covariance="exponential",
+    variance=1.0,
+    corrLength=0.05,
+    dtype=np.float64,
+):
+    # The backend expects corrLength as a list
+    if not is_iterable(corrLength):
+        corrLength = [corrLength]
+
+    # Create the backend configuration
+    config = {
+        "grid": {"cells": list(cells), "extensions": list(extensions)},
+        "stochastic": {
+            "corrLength": corrLength,
+            "covariance": covariance,
+            "variance": variance,
+        },
+    }
+
+    # Return the Python class representing the field
+    return RandomField(config, dtype=dtype)
+
+
+class RandomField:
+    def __init__(self, config, dtype=np.float64):
+        # Validate the given config
+        self.config = validate_config(config)
+
+        # We currently only support double precision
+        assert dtype == np.float64
+
+        # Instantiate a C++ class for the field generator
+        dim = len(self.config["grid"]["extensions"])
+        FieldType = getattr(_parafields, f"RandomField{dim}D")
+        self._field = FieldType(dict_to_parameter_tree(self.config))
+
+        # Trigger the generation process
+        self._field.generate()
+
+        # Storage for lazy evaluation
+        self._eval = None
+
+    def evaluate(self):
+        # Lazily evaluate the entire field
+        if self._eval is None:
+            self._eval = self._field.eval()
+        return self._eval
+
+    def _repr_png_(self):
+        eval_ = self.evaluate()
+        plt.imshow(eval_, interpolation="nearest")
 
 
 def interactive_field_generation():
