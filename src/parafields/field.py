@@ -42,9 +42,12 @@ def validate_config(config):
     return config
 
 
-def generate_field(config={}):
+def generate_field(config):
     """Generate a random field"""
-    return _parafields.RandomField2D(dict_to_parameter_tree(config))
+    config = validate_config(config)
+    dim = len(config["grid"]["extensions"])
+    FieldType = getattr(_parafields, f"RandomField{dim}D")
+    return FieldType(dict_to_parameter_tree(config))
 
 
 def interactive_field_generation():
