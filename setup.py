@@ -12,6 +12,7 @@ setup(
     zip_safe=False,
     cmake_args=[
         f"-DCMAKE_PREFIX_PATH={os.path.dirname(pybind11.__file__)}",
+        "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON",
     ],
     cmake_install_dir="src/parafields",
 )

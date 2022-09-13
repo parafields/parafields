@@ -4,13 +4,27 @@ project(parafields-external NONE)
 
 include(ExternalProject)
 
+ExternalProject_add(fakempi
+  GIT_REPOSITORY https://github.com/dokempf/FakeMPI.git
+  GIT_TAG petsc-unimpi
+  SOURCE_DIR ${CMAKE_BINARY_DIR}/fakempi
+  INSTALL_DIR ${CMAKE_BINARY_DIR}/fakempi-inst
+  USES_TERMINAL_DOWNLOAD 1
+  USES_TERMINAL_CONFIGURE 1
+  USES_TERMINAL_BUILD 1
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/fakempi-inst
+)
+
 ExternalProject_add(fftw3
   URL http://www.fftw.org/fftw-3.3.10.tar.gz
   URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
   SOURCE_DIR ${CMAKE_BINARY_DIR}/fftw3
   CONFIGURE_COMMAND
     ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/fftw3
-    #${CMAKE_COMMAND} -E env CC=${CMAKE_BINARY_DIR}/openmpi-inst/bin/mpicc
+    ${CMAKE_COMMAND} -E env MPILIBS=-lMPI_C
+    ${CMAKE_COMMAND} -E env LDFLAGS=-L${CMAKE_BINARY_DIR}/fakempi-inst/lib
+    ${CMAKE_COMMAND} -E env CPPFLAGS=-I${CMAKE_BINARY_DIR}/fakempi-inst/include
     ./configure
       --enable-shared --disable-static
       --prefix=${CMAKE_BINARY_DIR}/fftw3-inst
@@ -21,11 +35,12 @@ ExternalProject_add(fftw3
   USES_TERMINAL_DOWNLOAD 1
   USES_TERMINAL_CONFIGURE 1
   USES_TERMINAL_BUILD 1
+  DEPENDS fakempi
 )
 
 ExternalProject_add(dune-common
-  GIT_REPOSITORY https://gitlab.dune-project.org/core/dune-common.git
-  GIT_TAG releases/2.7
+  GIT_REPOSITORY https://github.com/dokempf/dune-common-fallback.git
+  GIT_TAG parafields-compatibility
   SOURCE_DIR ${CMAKE_BINARY_DIR}/dune-common
   UPDATE_COMMAND ""
   USES_TERMINAL_DOWNLOAD 1
@@ -34,11 +49,16 @@ ExternalProject_add(dune-common
   CMAKE_ARGS
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dune-inst
+    -DCMAKE_PREFIX_PATH=${CMAKE_BINARY_DIR}/fakempi-inst
+    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+    -DCMAKE_DISABLE_FIND_PACKAGE_TBB=ON
+    -DCMAKE_DISABLE_FIND_PACKAGE_Threads=ON
+  DEPENDS fakempi
 )
 
 ExternalProject_add(core
   GIT_REPOSITORY https://github.com/parafields/parafields-core.git
-  GIT_TAG main
+  GIT_TAG remove-mpi-cxx-target
   SOURCE_DIR ${CMAKE_BINARY_DIR}/core
   UPDATE_COMMAND ""
   USES_TERMINAL_DOWNLOAD 1
@@ -49,5 +69,6 @@ ExternalProject_add(core
     -DFFTW_ROOT=${CMAKE_BINARY_DIR}/fftw3-inst
     -Ddune-common_ROOT=${CMAKE_BINARY_DIR}/dune-inst
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/core-inst
-  DEPENDS dune-common fftw3
+    -DBUILD_APP=OFF
+  DEPENDS dune-common fftw3 fakempi
 )
