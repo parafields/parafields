@@ -29,6 +29,7 @@ ExternalProject_add(fftw3
       --enable-static --disable-shared
       --prefix=${CMAKE_BINARY_DIR}/fftw3-inst
       --enable-mpi
+      --with-pic
   INSTALL_COMMAND make install
   INSTALL_DIR ${CMAKE_BINARY_DIR}/fftw3-inst
   BUILD_IN_SOURCE ON
