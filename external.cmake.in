@@ -6,7 +6,7 @@ include(ExternalProject)
 
 ExternalProject_add(fakempi
   GIT_REPOSITORY https://github.com/dokempf/FakeMPI.git
-  GIT_TAG petsc-unimpi
+  GIT_TAG main
   SOURCE_DIR ${CMAKE_BINARY_DIR}/fakempi
   INSTALL_DIR ${CMAKE_BINARY_DIR}/fakempi-inst
   USES_TERMINAL_DOWNLOAD 1
