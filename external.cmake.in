@@ -26,7 +26,7 @@ ExternalProject_add(fftw3
     ${CMAKE_COMMAND} -E env LDFLAGS=-L${CMAKE_BINARY_DIR}/fakempi-inst/lib
     ${CMAKE_COMMAND} -E env CPPFLAGS=-I${CMAKE_BINARY_DIR}/fakempi-inst/include
     ./configure
-      --enable-shared --disable-static
+      --enable-static --disable-shared
       --prefix=${CMAKE_BINARY_DIR}/fftw3-inst
       --enable-mpi
   INSTALL_COMMAND make install
