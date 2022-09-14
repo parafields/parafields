@@ -59,3 +59,9 @@ repos:
         - --style=Mozilla
         exclude: ^ext/
         types_or: [c++]
+
+  # Check Configuration as Code files for integrations
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.17.1
+    hooks:
+      - id: check-github-workflows
