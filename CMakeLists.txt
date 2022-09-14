@@ -13,8 +13,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Determine whether we have MPI or not
+find_package(MPI)
+
 # Configure and build our external dependencies
-configure_file(external.cmake.in external/CMakeLists.txt)
+configure_file(external.cmake.in external/CMakeLists.txt @ONLY)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external)
 execute_process(COMMAND ${CMAKE_COMMAND} --build .

@@ -1,77 +1,88 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 
 project(parafields-external NONE)
 
 include(ExternalProject)
 
-ExternalProject_add(fakempi
-  GIT_REPOSITORY https://github.com/ssciwr/FakeMPI.git
-  GIT_TAG main
-  SOURCE_DIR ${CMAKE_BINARY_DIR}/fakempi
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/fakempi-inst
-  USES_TERMINAL_DOWNLOAD 1
-  USES_TERMINAL_CONFIGURE 1
-  USES_TERMINAL_BUILD 1
-  CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/fakempi-inst
-)
+set(FAKEMPI_DEP)
+set(FAKEMPI_FFTW_CONFIGURE)
+set(FAKEMPI_CMAKE_ARG)
+if(NOT @MPI_FOUND@)
+  ExternalProject_add(fakempi
+    GIT_REPOSITORY https://github.com/ssciwr/FakeMPI.git
+    GIT_TAG main
+    SOURCE_DIR @CMAKE_BINARY_DIR@/fakempi
+    INSTALL_DIR @CMAKE_BINARY_DIR@/fakempi-inst
+    USES_TERMINAL_DOWNLOAD 1
+    USES_TERMINAL_CONFIGURE 1
+    USES_TERMINAL_BUILD 1
+    CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fakempi-inst
+  )
+  set(FAKEMPI_DEP fakempi)
+  set(FAKEMPI_FFTW_CONFIGURE
+    ${CMAKE_COMMAND} -E env MPILIBS=-lMPI_C
+    ${CMAKE_COMMAND} -E env LDFLAGS=-L@CMAKE_BINARY_DIR@/fakempi-inst/lib
+    ${CMAKE_COMMAND} -E env CPPFLAGS=-I@CMAKE_BINARY_DIR@/fakempi-inst/include
+  )
+  set(FAKEMPI_CMAKE_ARG
+    -DCMAKE_PREFIX_PATH=@CMAKE_BINARY_DIR@/fakempi-inst
+    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+  )
+endif()
 
 ExternalProject_add(fftw3
   URL http://www.fftw.org/fftw-3.3.10.tar.gz
   URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
-  SOURCE_DIR ${CMAKE_BINARY_DIR}/fftw3
+  SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3
   CONFIGURE_COMMAND
-    ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/fftw3
-    ${CMAKE_COMMAND} -E env MPILIBS=-lMPI_C
-    ${CMAKE_COMMAND} -E env LDFLAGS=-L${CMAKE_BINARY_DIR}/fakempi-inst/lib
-    ${CMAKE_COMMAND} -E env CPPFLAGS=-I${CMAKE_BINARY_DIR}/fakempi-inst/include
+    ${CMAKE_COMMAND} -E chdir @CMAKE_BINARY_DIR@/fftw3
+    ${FAKEMPI_FFTW_CONFIGURE}
     ./configure
       --enable-static --disable-shared
-      --prefix=${CMAKE_BINARY_DIR}/fftw3-inst
+      --prefix=@CMAKE_BINARY_DIR@/fftw3-inst
       --enable-mpi
       --with-pic
   INSTALL_COMMAND make install
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/fftw3-inst
+  INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
   BUILD_IN_SOURCE ON
   USES_TERMINAL_DOWNLOAD 1
   USES_TERMINAL_CONFIGURE 1
   USES_TERMINAL_BUILD 1
-  DEPENDS fakempi
+  DEPENDS ${FAKEMPI_DEP}
 )
 
 ExternalProject_add(dune-common
   GIT_REPOSITORY https://github.com/dokempf/dune-common-fallback.git
   GIT_TAG parafields-compatibility
-  SOURCE_DIR ${CMAKE_BINARY_DIR}/dune-common
+  SOURCE_DIR @CMAKE_BINARY_DIR@/dune-common
   UPDATE_COMMAND ""
   USES_TERMINAL_DOWNLOAD 1
   USES_TERMINAL_CONFIGURE 1
   USES_TERMINAL_BUILD 1
   CMAKE_ARGS
     -DCMAKE_BUILD_TYPE=Release
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dune-inst
-    -DCMAKE_PREFIX_PATH=${CMAKE_BINARY_DIR}/fakempi-inst
-    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+    -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/dune-inst
+    ${FAKEMPI_CMAKE_ARG}
     -DCMAKE_DISABLE_FIND_PACKAGE_TBB=ON
     -DCMAKE_DISABLE_FIND_PACKAGE_Threads=ON
-  DEPENDS fakempi
+  DEPENDS ${FAKEMPI_DEP}
 )
 
 ExternalProject_add(core
   GIT_REPOSITORY https://github.com/parafields/parafields-core.git
   GIT_TAG main
-  SOURCE_DIR ${CMAKE_BINARY_DIR}/core
+  SOURCE_DIR @CMAKE_BINARY_DIR@/core
   UPDATE_COMMAND ""
   USES_TERMINAL_DOWNLOAD 1
   USES_TERMINAL_CONFIGURE 1
   USES_TERMINAL_BUILD 1
   CMAKE_ARGS
     -DCMAKE_BUILD_TYPE=Release
-    -DFFTW_ROOT=${CMAKE_BINARY_DIR}/fftw3-inst
-    -Ddune-common_ROOT=${CMAKE_BINARY_DIR}/dune-inst
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/core-inst
-    -DCMAKE_PREFIX_PATH=${CMAKE_BINARY_DIR}/fakempi-inst
-    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+    -DFFTW_ROOT=@CMAKE_BINARY_DIR@/fftw3-inst
+    -Ddune-common_ROOT=@CMAKE_BINARY_DIR@/dune-inst
+    -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/core-inst
+    ${FAKEMPI_CMAKE_ARG}
     -DBUILD_APP=OFF
-  DEPENDS dune-common fftw3 fakempi
+  DEPENDS dune-common fftw3 ${FAKEMPI_DEP}
 )
