@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: Testing on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    name: Testing on ${{ matrix.os }} with Python ${{ matrix.python-version }} and MPI=${{ matrix.parallel }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
