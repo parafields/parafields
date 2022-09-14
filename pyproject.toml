@@ -32,6 +32,7 @@ classifiers = [
 ]
 dependencies = [
     "jsonschema<4",
+    "matplotlib",
     "numpy",
 ]
 
