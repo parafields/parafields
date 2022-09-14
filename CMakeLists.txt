@@ -9,8 +9,12 @@ project(
 # Enable PIC for Python bindings
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Define the minimum C++ standard that is required
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Configure and build our external dependencies
-configure_file(external.cmake.in external/CMakeLists.txt)
+configure_file(external.cmake.in external/CMakeLists.txt @ONLY)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external)
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
@@ -19,7 +23,8 @@ execute_process(COMMAND ${CMAKE_COMMAND} --build .
 # Find the parafields library
 set(CMAKE_PREFIX_PATH
     ${CMAKE_BINARY_DIR}/core-inst ${CMAKE_BINARY_DIR}/dune-inst
-    ${CMAKE_BINARY_DIR}/fftw3-inst "${CMAKE_PREFIX_PATH}")
+    ${CMAKE_BINARY_DIR}/fftw3-inst ${CMAKE_BINARY_DIR}/fakempi-inst
+    "${CMAKE_PREFIX_PATH}")
 
 find_package(parafields REQUIRED)
 find_package(pybind11 REQUIRED)

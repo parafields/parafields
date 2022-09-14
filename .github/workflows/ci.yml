@@ -14,18 +14,20 @@ on:
 
 jobs:
   test:
-    name: Testing on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    name: Testing on ${{ matrix.os }} with Python ${{ matrix.python-version }} and MPI=${{ matrix.parallel }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.9"]
+        parallel: ["ON", "OFF"]
 
     steps:
     - name: Checking out the repository
       uses: actions/checkout@v3
 
     - name: Installing system dependencies
+      if: matrix.parallel == 'ON'
       run: |
         sudo apt update
         sudo apt install libopenmpi-dev
@@ -35,9 +37,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install Python package
+    - name: Install sequential Python package
+      if: matrix.parallel == 'OFF'
       run: |
         python -m pip install -v .[tests]
+
+    - name: Install parallel Python package
+      if: matrix.parallel == 'ON'
+      run: |
+        python -m pip install -v .[tests,mpi]
 
     - name: Run test suite
       run: |
