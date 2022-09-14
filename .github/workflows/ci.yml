@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Installing system dependencies
-      if: ${{ matrix.parallel }} == "ON"
+      if: matrix.parallel == "ON"
       run: |
         sudo apt update
         sudo apt install libopenmpi-dev
@@ -38,12 +38,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install sequential Python package
-      if: ${{ matrix.parallel }} == "OFF"
+      if: matrix.parallel == "OFF"
       run: |
         python -m pip install -v .[tests]
 
     - name: Install parallel Python package
-      if: ${{ matrix.parallel }} == "ON"
+      if: matrix.parallel == "ON"
       run: |
         python -m pip install -v .[tests,mpi]
 
