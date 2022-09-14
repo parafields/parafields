@@ -10,21 +10,78 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        include:
+          - os: ubuntu-20.04
+            arch: "x86_64"
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Build wheels
+    - name: Build wheels (arch=${{ matrix.arch }})
       uses: pypa/cibuildwheel@v2.9.0
+      env:
+        CIBW_ARCHS: "${{ matrix.arch }}"
 
     - uses: actions/upload-artifact@v3
       with:
         path: ./wheelhouse/*.whl
 
+  build-sdist:
+    name: Build Source distribution
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build SDist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifact
+          path: dist/*.tar.gz
+
+  test-sdist:
+    name: Test source distribution on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: [build-sdist]
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install MPI
+        run: |
+          sudo apt update
+          sudo apt install libopenmpi-dev
+
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifact
+          path: dist
+
+      - name: Install from SDist
+        shell: bash
+        run:
+          python -m pip install dist/*.tar.gz
+          python -m pip install mpi4py pytest
+
+      - name: Run test suite
+        run:
+          python -m pytest
+
   upload_pypi:
-    needs: [build-wheels]
+    needs: [build-sdist, build-wheels, test-sdist]
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'parafields'
     steps:
       - uses: actions/download-artifact@v3
         with:
