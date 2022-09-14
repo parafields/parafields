@@ -4,10 +4,13 @@ project(parafields-external NONE)
 
 include(ExternalProject)
 
+# Determine whether we have MPI or not
+find_package(MPI)
+
 set(FAKEMPI_DEP)
 set(FAKEMPI_FFTW_CONFIGURE)
 set(FAKEMPI_CMAKE_ARG)
-if(NOT @MPI_FOUND@)
+if(NOT MPI_FOUND)
   ExternalProject_add(fakempi
     GIT_REPOSITORY https://github.com/ssciwr/FakeMPI.git
     GIT_TAG main
