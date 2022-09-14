@@ -32,13 +32,15 @@ classifiers = [
 ]
 dependencies = [
     "jsonschema<4",
-    "mpi4py",
     "numpy",
 ]
 
 [project.optional-dependencies]
 jupyter = [
     "ipywidgets-jsonschema",
+]
+mpi = [
+    "mpi4py",
 ]
 tests = [
     "pytest",
