@@ -4,7 +4,6 @@
 
 #include <dune/common/fvector.hh>
 
-#include <parafields/python.hpp>
 #include <parafields/randomfield.hh>
 
 #include <memory>

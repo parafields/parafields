@@ -29,16 +29,10 @@ set(CMAKE_PREFIX_PATH
 find_package(parafields REQUIRED)
 find_package(pybind11 REQUIRED)
 
-# Build the support library
-add_library(parafields_python STATIC lib/python.cpp)
-target_link_libraries(parafields_python PUBLIC parafields::parafields
-                                               pybind11::pybind11)
-target_include_directories(parafields_python
-                           PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
 # Build the Python package
 pybind11_add_module(_parafields src/parafields/_parafields.cpp)
-target_link_libraries(_parafields PUBLIC parafields_python)
+target_link_libraries(_parafields PUBLIC parafields::parafields
+                                         pybind11::pybind11)
 
 # Install the compiled modules in the correct location
 install(TARGETS _parafields DESTINATION .)

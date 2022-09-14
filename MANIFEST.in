@@ -1,4 +1,4 @@
-include CMakeLists.text
+include CMakeLists.txt
 include external.cmake.in
 include LICENSE.md
 include pyproject.toml
@@ -6,5 +6,4 @@ include setup.py
 
 include src/parafields/schema.json
 
-graft lib
 graft src
