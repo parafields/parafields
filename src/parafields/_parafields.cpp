@@ -28,34 +28,35 @@ public:
   using Domain = Dune::FieldVector<DF, dim>;
 };
 
-#define GENERATE_FIELD_DIM(dim)                                                \
-  using RandomField##dim##D =                                                  \
-    Dune::RandomField::RandomField<GridTraits<double, double, dim>>;           \
-  py::class_<RandomField##dim##D> field##dim##d(m, "RandomField" #dim "D");    \
-  field##dim##d.def(py::init<Dune::ParameterTree>());                          \
-  field##dim##d.def("generate",                                                \
-                    [](RandomField##dim##D& self, unsigned int seed) {         \
-                      self.generate(seed);                                     \
-                    });                                                        \
-  field##dim##d.def(                                                           \
+#define GENERATE_FIELD_DIM(dim, t)                                             \
+  using RandomField##dim##D_##t =                                              \
+    Dune::RandomField::RandomField<GridTraits<t, t, dim>>;                     \
+  py::class_<RandomField##dim##D_##t> field##dim##d_##t(                       \
+    m, "RandomField" #dim "D_" #t);                                            \
+  field##dim##d_##t.def(py::init<Dune::ParameterTree>());                      \
+  field##dim##d_##t.def("generate",                                            \
+                        [](RandomField##dim##D_##t& self, unsigned int seed) { \
+                          self.generate(seed);                                 \
+                        });                                                    \
+  field##dim##d_##t.def(                                                       \
     "probe",                                                                   \
-    [](const RandomField##dim##D& self, const py::array_t<double>& pos) {      \
-      Dune::FieldVector<double, 1> out;                                        \
-      Dune::FieldVector<double, dim> apos;                                     \
+    [](const RandomField##dim##D_##t& self, const py::array_t<t>& pos) {       \
+      Dune::FieldVector<t, 1> out;                                             \
+      Dune::FieldVector<t, dim> apos;                                          \
       std::copy(pos.data(), pos.data() + dim, apos.begin());                   \
       self.evaluate(apos, out);                                                \
       return out[0];                                                           \
     });                                                                        \
                                                                                \
-  field##dim##d.def("eval", [](const RandomField##dim##D& self) {              \
+  field##dim##d_##t.def("eval", [](const RandomField##dim##D_##t& self) {      \
     std::array<unsigned int, dim> size;                                        \
-    std::vector<Dune::FieldVector<double, 1>> out;                             \
+    std::vector<Dune::FieldVector<t, 1>> out;                                  \
     self.bulkEvaluate(out, size);                                              \
     std::array<std::size_t, dim> strides;                                      \
-    strides[0] = sizeof(double);                                               \
+    strides[0] = sizeof(t);                                                    \
     for (std::size_t i = 1; i < dim; ++i)                                      \
       strides[i] = strides[i - 1] * size[i - 1];                               \
-    return py::array(py::dtype("double"), size, strides, out[0].data());       \
+    return py::array(py::dtype::of<t>(), size, strides, out[0].data());        \
   });
 
 PYBIND11_MODULE(_parafields, m)
@@ -73,9 +74,32 @@ PYBIND11_MODULE(_parafields, m)
             });
 
   // Expose the RandomField template instantiations
-  GENERATE_FIELD_DIM(1)
-  GENERATE_FIELD_DIM(2)
-  GENERATE_FIELD_DIM(3)
+
+  // Double Precision for dim=1, 2, 3
+#ifdef HAVE_FFTW3_DOUBLE
+  GENERATE_FIELD_DIM(1, double)
+  GENERATE_FIELD_DIM(2, double)
+  GENERATE_FIELD_DIM(3, double)
+#endif
+
+  // Single Precision for dim=1, 2, 3
+#ifdef HAVE_FFTW3_FLOAT
+  GENERATE_FIELD_DIM(1, float)
+  GENERATE_FIELD_DIM(2, float)
+  GENERATE_FIELD_DIM(3, float)
+#endif
+
+  m.def("has_precision", [](std::string type) {
+#ifdef HAVE_FFTW3_DOUBLE
+    if (type == "double")
+      return true;
+#endif
+#ifdef HAVE_FFTW3_FLOAT
+    if (type == "float")
+      return true;
+#endif
+    return false;
+  });
 }
 
 } // namespace parafields
