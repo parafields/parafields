@@ -118,6 +118,7 @@ ExternalProject_add(core
     -Ddune-common_ROOT=@CMAKE_BINARY_DIR@/dune-inst
     -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/core-inst
     ${FAKEMPI_CMAKE_ARG}
+    -DCMAKE_DISABLE_FIND_PACKAGE_GSL=ON
     -DBUILD_APP=OFF
   DEPENDS dune-common ${FFTW_DEP} ${FAKEMPI_DEP}
 )
