@@ -37,6 +37,17 @@ public:
                     [](RandomField##dim##D& self, unsigned int seed) {         \
                       self.generate(seed);                                     \
                     });                                                        \
+                                                                               \
+  field##dim##d.def("coarsen", [](RandomField##dim##D& self) {                 \
+    self.coarsenMatrix();                                                      \
+    self.coarsen();                                                            \
+  });                                                                          \
+                                                                               \
+  field##dim##d.def("refine", [](RandomField##dim##D& self) {                  \
+    self.refineMatrix();                                                       \
+    self.refine();                                                             \
+  });                                                                          \
+                                                                               \
   field##dim##d.def(                                                           \
     "probe",                                                                   \
     [](const RandomField##dim##D& self, const py::array_t<double>& pos) {      \

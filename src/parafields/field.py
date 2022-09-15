@@ -105,6 +105,24 @@ class RandomField:
             self._eval = self._field.eval()
         return self._eval
 
+    def coarsen(self):
+        """Coarsen the random field
+
+        This is decreasing the resolution of the grid that the random
+        field is defined on by a factor of two.
+        """
+        self._eval = None
+        self._field.coarsen()
+
+    def refine(self):
+        """Refine the random field
+
+        This is increasing the resolution of the grid that the random
+        field is defined on by a factor of two.
+        """
+        self._eval = None
+        self._field.refine()
+
     def _repr_png_(self):
         eval_ = self.evaluate()
         plt.imshow(eval_, interpolation="nearest")

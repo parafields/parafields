@@ -135,7 +135,7 @@
     "randomField": {
       "properties": {
         "cacheInvMatvec": {
-          "default": true,
+          "default": false,
           "description": "Whether matvecs with inverse covariance matrix are cached",
           "type": "boolean"
         },
