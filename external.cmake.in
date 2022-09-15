@@ -10,7 +10,7 @@ find_package(MPI)
 set(FAKEMPI_DEP)
 set(FAKEMPI_FFTW_CONFIGURE)
 set(FAKEMPI_CMAKE_ARG)
-if(NOT MPI_FOUND)
+if(( NOT MPI_FOUND ) OR (@FORCE_SEQUENTIAL@))
   ExternalProject_add(fakempi
     GIT_REPOSITORY https://github.com/ssciwr/FakeMPI.git
     GIT_TAG main
@@ -44,6 +44,7 @@ if(@BUILD_SINGLE_PRECISION@)
     SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3-float
     CONFIGURE_COMMAND
       ${CMAKE_COMMAND} -E chdir @CMAKE_BINARY_DIR@/fftw3-float
+      ${CMAKE_COMMAND} -E env CC=${CMAKE_C_COMPILER}
       ${FAKEMPI_FFTW_CONFIGURE}
       ./configure
         --enable-static --disable-shared
