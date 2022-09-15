@@ -56,6 +56,7 @@ def generate_field(
     variance=1.0,
     corrLength=0.05,
     dtype=np.float64,
+    seed=0,
 ):
     # The backend expects corrLength as a list
     if not is_iterable(corrLength):
@@ -69,6 +70,7 @@ def generate_field(
             "covariance": covariance,
             "variance": variance,
         },
+        "seed": seed,
     }
 
     # Return the Python class representing the field
@@ -83,13 +85,16 @@ class RandomField:
         # We currently only support double precision
         assert dtype == np.float64
 
+        # Extract the seed from the configuration
+        seed = self.config.get("seed", 0)
+
         # Instantiate a C++ class for the field generator
         dim = len(self.config["grid"]["extensions"])
         FieldType = getattr(_parafields, f"RandomField{dim}D")
         self._field = FieldType(dict_to_parameter_tree(self.config))
 
         # Trigger the generation process
-        self._field.generate()
+        self._field.generate(seed)
 
         # Storage for lazy evaluation
         self._eval = None

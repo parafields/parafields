@@ -34,7 +34,9 @@ public:
   py::class_<RandomField##dim##D> field##dim##d(m, "RandomField" #dim "D");    \
   field##dim##d.def(py::init<Dune::ParameterTree>());                          \
   field##dim##d.def("generate",                                                \
-                    [](RandomField##dim##D& self) { self.generate(); });       \
+                    [](RandomField##dim##D& self, unsigned int seed) {         \
+                      self.generate(seed);                                     \
+                    });                                                        \
   field##dim##d.def(                                                           \
     "probe",                                                                   \
     [](const RandomField##dim##D& self, const py::array_t<double>& pos) {      \
