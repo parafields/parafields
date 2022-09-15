@@ -36,26 +36,56 @@ if(NOT MPI_FOUND)
   )
 endif()
 
-ExternalProject_add(fftw3
-  URL http://www.fftw.org/fftw-3.3.10.tar.gz
-  URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
-  SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3
-  CONFIGURE_COMMAND
-    ${CMAKE_COMMAND} -E chdir @CMAKE_BINARY_DIR@/fftw3
-    ${FAKEMPI_FFTW_CONFIGURE}
-    ./configure
-      --enable-static --disable-shared
-      --prefix=@CMAKE_BINARY_DIR@/fftw3-inst
-      --enable-mpi
-      --with-pic
-  INSTALL_COMMAND make install
-  INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
-  BUILD_IN_SOURCE ON
-  USES_TERMINAL_DOWNLOAD 1
-  USES_TERMINAL_CONFIGURE 1
-  USES_TERMINAL_BUILD 1
-  DEPENDS ${FAKEMPI_DEP}
-)
+set(FFTW_DEP)
+if(@BUILD_SINGLE_PRECISION@)
+  ExternalProject_add(fftw3-float
+    URL http://www.fftw.org/fftw-3.3.10.tar.gz
+    URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
+    SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3-float
+    CONFIGURE_COMMAND
+      ${CMAKE_COMMAND} -E chdir @CMAKE_BINARY_DIR@/fftw3-float
+      ${FAKEMPI_FFTW_CONFIGURE}
+      ./configure
+        --enable-static --disable-shared
+        --prefix=@CMAKE_BINARY_DIR@/fftw3-inst
+        --enable-single
+        --enable-mpi
+        --with-pic
+    INSTALL_COMMAND make install
+    INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
+    BUILD_IN_SOURCE ON
+    USES_TERMINAL_DOWNLOAD 1
+    USES_TERMINAL_CONFIGURE 1
+    USES_TERMINAL_BUILD 1
+    DEPENDS ${FAKEMPI_DEP}
+  )
+  set(FFTW_DEP fftw3-float)
+endif()
+
+set(FFTW_DOUBLE_DEP)
+if(@BUILD_DOUBLE_PRECISION@)
+  ExternalProject_add(fftw3-double
+    URL http://www.fftw.org/fftw-3.3.10.tar.gz
+    URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
+    SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3-double
+    CONFIGURE_COMMAND
+      ${CMAKE_COMMAND} -E chdir @CMAKE_BINARY_DIR@/fftw3-double
+      ${FAKEMPI_FFTW_CONFIGURE}
+      ./configure
+        --enable-static --disable-shared
+        --prefix=@CMAKE_BINARY_DIR@/fftw3-inst
+        --enable-mpi
+        --with-pic
+    INSTALL_COMMAND make install
+    INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
+    BUILD_IN_SOURCE ON
+    USES_TERMINAL_DOWNLOAD 1
+    USES_TERMINAL_CONFIGURE 1
+    USES_TERMINAL_BUILD 1
+    DEPENDS ${FAKEMPI_DEP}
+  )
+  set(FFTW_DEP fftw3-double ${FFTW_DEP})
+endif()
 
 ExternalProject_add(dune-common
   GIT_REPOSITORY https://github.com/dokempf/dune-common-fallback.git
@@ -89,5 +119,5 @@ ExternalProject_add(core
     -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/core-inst
     ${FAKEMPI_CMAKE_ARG}
     -DBUILD_APP=OFF
-  DEPENDS dune-common fftw3 ${FAKEMPI_DEP}
+  DEPENDS dune-common ${FFTW_DEP} ${FAKEMPI_DEP}
 )

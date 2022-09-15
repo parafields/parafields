@@ -6,6 +6,10 @@ project(
   VERSION 0.1
   LANGUAGES C CXX)
 
+# Define user-facing options
+option(BUILD_SINGLE_PRECISION "Enable building single precision support" OFF)
+option(BUILD_DOUBLE_PRECISION "Enable building double precision support" ON)
+
 # Enable PIC for Python bindings
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 

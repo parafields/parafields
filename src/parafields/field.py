@@ -77,20 +77,34 @@ def generate_field(
     return RandomField(config, dtype=dtype)
 
 
+# A mapping of numpy types to C++ type names
+possible_types = {np.float64: "double", np.float32: "float"}
+
+# Restriction of types that parafields was compiled with
+available_types = {
+    dt: t for dt, t in possible_types.items() if _parafields.has_precision(t)
+}
+
+
 class RandomField:
     def __init__(self, config, dtype=np.float64):
         # Validate the given config
         self.config = validate_config(config)
 
-        # We currently only support double precision
-        assert dtype == np.float64
+        # Ensure that the given dtype is supported by parafields
+        if dtype not in possible_types:
+            raise NotImplementedError("Dtype not supported by parafields!")
+        if dtype not in available_types:
+            raise NotImplementedError(
+                "parafields was not compiler for dtype, but could be!"
+            )
 
         # Extract the seed from the configuration
         seed = self.config.get("seed", 0)
 
         # Instantiate a C++ class for the field generator
         dim = len(self.config["grid"]["extensions"])
-        FieldType = getattr(_parafields, f"RandomField{dim}D")
+        FieldType = getattr(_parafields, f"RandomField{dim}D_{available_types[dtype]}")
         self._field = FieldType(dict_to_parameter_tree(self.config))
 
         # Trigger the generation process
