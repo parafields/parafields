@@ -45,6 +45,7 @@ mpi = [
 ]
 tests = [
     "pytest",
+    "pytest-mpi",
 ]
 
 
