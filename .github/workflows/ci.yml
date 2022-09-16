@@ -32,6 +32,11 @@ jobs:
           sudo apt update
           sudo apt install libopenmpi-dev
 
+      - name: Installing system dependencies
+        if: matrix.parallel == 'ON' && runner.os == 'MacOS'
+        run: |
+          brew install open-mpi
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
