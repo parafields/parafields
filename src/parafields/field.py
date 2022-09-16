@@ -6,6 +6,7 @@ import os
 import parafields._parafields as _parafields
 
 from matplotlib import pyplot as plt
+from parafields.mpi import default_partitioning, MPI
 
 
 def is_iterable(x):
@@ -57,6 +58,7 @@ def generate_field(
     corrLength=0.05,
     dtype=np.float64,
     seed=0,
+    partitioning=None,
 ):
     # The backend expects corrLength as a list
     if not is_iterable(corrLength):
@@ -74,7 +76,7 @@ def generate_field(
     }
 
     # Return the Python class representing the field
-    return RandomField(config, dtype=dtype)
+    return RandomField(config, dtype=dtype, partitioning=partitioning)
 
 
 # A mapping of numpy types to C++ type names
@@ -87,7 +89,7 @@ available_types = {
 
 
 class RandomField:
-    def __init__(self, config, dtype=np.float64):
+    def __init__(self, config, dtype=np.float64, partitioning=None):
         # Validate the given config
         self.config = validate_config(config)
 
@@ -102,10 +104,23 @@ class RandomField:
         # Extract the seed from the configuration
         seed = self.config.get("seed", 0)
 
+        # Extract the partitioning (function)
+        if partitioning is None:
+            partitioning = default_partitioning
+
+        if MPI is None:
+            partitioning = (1,) * len(self.config["grid"]["cells"])
+        else:
+            # If the given partitioning is a function, call it
+            if isinstance(partitioning, collections.abc.Callable):
+                partitioning = partitioning(
+                    MPI.COMM_WORLD.size, self.config["grid"]["cells"]
+                )
+
         # Instantiate a C++ class for the field generator
         dim = len(self.config["grid"]["extensions"])
         FieldType = getattr(_parafields, f"RandomField{dim}D_{available_types[dtype]}")
-        self._field = FieldType(dict_to_parameter_tree(self.config))
+        self._field = FieldType(dict_to_parameter_tree(self.config), partitioning)
 
         # Trigger the generation process
         self._field.generate(seed)

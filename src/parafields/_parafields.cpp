@@ -13,6 +13,7 @@ namespace py = pybind11;
 
 namespace parafields {
 
+/** The traits class expected by parafields */
 template<typename DF, typename RF, unsigned int dimension>
 class GridTraits
 {
@@ -28,16 +29,48 @@ public:
   using Domain = Dune::FieldVector<DF, dim>;
 };
 
+/** @brief A no-op loadbalancer
+ *
+ * This class fulfills the interface expected by parafields, but takes
+ * the output as input and correctly forwards it.
+ */
+template<long unsigned int dim>
+class FixedLoadBalance
+{
+public:
+  FixedLoadBalance(std::array<int, dim> result)
+    : result(result)
+  {
+  }
+
+  void loadbalance(const std::array<int, dim>&,
+                   int,
+                   std::array<int, dim>& dims) const
+  {
+    dims = result;
+  }
+
+private:
+  std::array<int, dim> result;
+};
+
 #define GENERATE_FIELD_DIM(dim, t)                                             \
   using RandomField##dim##D_##t =                                              \
     Dune::RandomField::RandomField<GridTraits<t, t, dim>>;                     \
   py::class_<RandomField##dim##D_##t> field##dim##d_##t(                       \
     m, "RandomField" #dim "D_" #t);                                            \
-  field##dim##d_##t.def(py::init<Dune::ParameterTree>());                      \
+                                                                               \
+  field##dim##d_##t.def(                                                       \
+    py::init([](Dune::ParameterTree tree, std::array<int, dim> partitioning) { \
+      FixedLoadBalance lb(partitioning);                                       \
+      return std::make_unique<RandomField##dim##D_##t>(tree, "", lb);          \
+    }));                                                                       \
+                                                                               \
   field##dim##d_##t.def("generate",                                            \
                         [](RandomField##dim##D_##t& self, unsigned int seed) { \
                           self.generate(seed);                                 \
                         });                                                    \
+                                                                               \
   field##dim##d_##t.def(                                                       \
     "probe",                                                                   \
     [](const RandomField##dim##D_##t& self, const py::array_t<t>& pos) {       \
