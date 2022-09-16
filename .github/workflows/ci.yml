@@ -54,4 +54,4 @@ jobs:
     - name: Run parallel test suite
       if: matrix.parallel == 'ON'
       run: |
-        mpirun -np 4 python -m pytest --only-mpi
+        mpirun --oversubscribe -np 4 python -m pytest --only-mpi
