@@ -89,6 +89,16 @@ PYBIND11_MODULE(_parafields, m)
   GENERATE_FIELD_DIM(3, float)
 #endif
 
+  // Export to Python whether we built this against FakeMPI
+  m.def("uses_fakempi", []() {
+#if MPI_IS_FAKEMPI
+    return true;
+#else
+    return false;
+#endif
+  });
+
+  // Export the available floating point precision
   m.def("has_precision", [](std::string type) {
 #ifdef HAVE_FFTW3_DOUBLE
     if (type == "double")
