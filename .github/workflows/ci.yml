@@ -18,40 +18,49 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.9"]
         parallel: ["ON", "OFF"]
 
     steps:
-    - name: Checking out the repository
-      uses: actions/checkout@v3
+      - name: Checking out the repository
+        uses: actions/checkout@v3
 
-    - name: Installing system dependencies
-      if: matrix.parallel == 'ON'
-      run: |
-        sudo apt update
-        sudo apt install libopenmpi-dev
+      - name: Installing system dependencies
+        if: matrix.parallel == 'ON' && runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install libopenmpi-dev
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Installing system dependencies
+        if: matrix.parallel == 'ON' && runner.os == 'MacOS'
+        run: |
+          brew install open-mpi
 
-    - name: Install sequential Python package
-      if: matrix.parallel == 'OFF'
-      run: |
-        python -m pip install -v .[tests]
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install parallel Python package
-      if: matrix.parallel == 'ON'
-      run: |
-        python -m pip install -v .[tests,mpi]
+      - name: Install sequential Python package
+        if: matrix.parallel == 'OFF'
+        run: |
+          python -m pip install -v .[tests]
+        env:
+          CMAKE_ARGS: "-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DFORCE_SEQUENTIAL=ON"
 
-    - name: Run test suite
-      run: |
-        python -m pytest
+      - name: Install parallel Python package
+        if: matrix.parallel == 'ON'
+        run: |
+          python -m pip install -v .[tests,mpi]
+        env:
+          CMAKE_ARGS: "-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
 
-    - name: Run parallel test suite
-      if: matrix.parallel == 'ON'
-      run: |
-        mpirun --oversubscribe -np 4 python -m pytest --only-mpi
+      - name: Run test suite
+        run: |
+          python -m pytest
+
+      - name: Run parallel test suite
+        if: matrix.parallel == 'ON'
+        run: |
+          mpirun --oversubscribe -np 4 python -m pytest --only-mpi

@@ -7,6 +7,7 @@ project(
   LANGUAGES C CXX)
 
 # Define user-facing options
+option(FORCE_SEQUENTIAL "Force a sequential build" OFF)
 option(BUILD_SINGLE_PRECISION "Enable building single precision support" OFF)
 option(BUILD_DOUBLE_PRECISION "Enable building double precision support" ON)
 
