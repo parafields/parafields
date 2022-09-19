@@ -34,7 +34,7 @@ namespace parafields {
 
 #define GENERATE_FIELD_DIM(dim, t)                                             \
   using RandomField##dim##D_##t =                                              \
-    Dune::RandomField::RandomField<GridTraits<t, t, dim>>;                     \
+    parafields::RandomField<GridTraits<t, t, dim>>;                            \
   py::class_<RandomField##dim##D_##t> field##dim##d_##t(                       \
     m, "RandomField" #dim "D_" #t);                                            \
                                                                                \
