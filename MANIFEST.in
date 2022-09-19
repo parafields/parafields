@@ -6,4 +6,5 @@ include setup.py
 
 include src/parafields/schema.json
 
+graft include
 graft src

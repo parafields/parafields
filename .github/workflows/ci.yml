@@ -45,6 +45,7 @@ jobs:
       - name: Install sequential Python package
         if: matrix.parallel == 'OFF'
         run: |
+          sed -i.bak 's|"mpi4py",||g' pyproject.toml
           python -m pip install -v .[tests]
         env:
           CMAKE_ARGS: "-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DFORCE_SEQUENTIAL=ON"
@@ -52,7 +53,7 @@ jobs:
       - name: Install parallel Python package
         if: matrix.parallel == 'ON'
         run: |
-          python -m pip install -v .[tests,mpi]
+          python -m pip install -v .[tests]
         env:
           CMAKE_ARGS: "-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
 
