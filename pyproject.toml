@@ -37,6 +37,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+docs = [
+    "m2r2",
+    "nbsphinx",
+    "nbsphinx-link",
+    "sphinx",
+    "sphinx_rtd_theme",
+]
 jupyter = [
     "ipywidgets-jsonschema",
 ]
