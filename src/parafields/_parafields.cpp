@@ -2,10 +2,16 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <dune/common/fvector.hh>
-
+#include <parafields/python/loadbalance.hh>
+#if !MPI_IS_FAKEMPI
+#include <parafields/python/mpi.hh>
+#endif
+#include <parafields/python/traits.hh>
 #include <parafields/randomfield.hh>
 
+#include <dune/common/fvector.hh>
+
+#include <array>
 #include <memory>
 #include <string>
 
@@ -13,46 +19,18 @@ namespace py = pybind11;
 
 namespace parafields {
 
-/** The traits class expected by parafields */
-template<typename DF, typename RF, unsigned int dimension>
-class GridTraits
-{
-public:
-  enum
-  {
-    dim = dimension
-  };
-
-  using RangeField = RF;
-  using Scalar = Dune::FieldVector<RF, 1>;
-  using DomainField = DF;
-  using Domain = Dune::FieldVector<DF, dim>;
-};
-
-/** @brief A no-op loadbalancer
- *
- * This class fulfills the interface expected by parafields, but takes
- * the output as input and correctly forwards it.
- */
-template<long unsigned int dim>
-class FixedLoadBalance
-{
-public:
-  FixedLoadBalance(std::array<int, dim> result)
-    : result(result)
-  {
-  }
-
-  void loadbalance(const std::array<int, dim>&,
-                   int,
-                   std::array<int, dim>& dims) const
-  {
-    dims = result;
-  }
-
-private:
-  std::array<int, dim> result;
-};
+#if !MPI_IS_FAKEMPI
+#define ADD_MPI_CONSTRUCTOR(dim, t)                                            \
+  field##dim##d_##t.def(py::init([](Dune::ParameterTree tree,                  \
+                                    std::array<int, dim> partitioning,         \
+                                    MPI4PyCommunicator comm) {                 \
+    FixedLoadBalance lb(partitioning);                                         \
+    return std::make_unique<RandomField##dim##D_##t>(                          \
+      tree, "", lb, comm.value);                                               \
+  }));
+#else
+#define ADD_MPI_CONSTRUCTOR(dim, t) ""
+#endif
 
 #define GENERATE_FIELD_DIM(dim, t)                                             \
   using RandomField##dim##D_##t =                                              \
@@ -60,15 +38,18 @@ private:
   py::class_<RandomField##dim##D_##t> field##dim##d_##t(                       \
     m, "RandomField" #dim "D_" #t);                                            \
                                                                                \
-  field##dim##d_##t.def(                                                       \
-    py::init([](Dune::ParameterTree tree, std::array<int, dim> partitioning) { \
-      FixedLoadBalance lb(partitioning);                                       \
-      return std::make_unique<RandomField##dim##D_##t>(tree, "", lb);          \
-    }));                                                                       \
+  field##dim##d_##t.def(py::init([](Dune::ParameterTree tree) {                \
+    std::array<int, dim> partitioning;                                         \
+    std::fill(partitioning.begin(), partitioning.end(), 1);                    \
+    FixedLoadBalance lb(partitioning);                                         \
+    return std::make_unique<RandomField##dim##D_##t>(tree, "", lb);            \
+  }));                                                                         \
+                                                                               \
+  ADD_MPI_CONSTRUCTOR(dim, t);                                                 \
                                                                                \
   field##dim##d_##t.def("generate",                                            \
                         [](RandomField##dim##D_##t& self, unsigned int seed) { \
-                          self.generate(seed);                                 \
+                          self.generate(seed, true);                           \
                         });                                                    \
                                                                                \
   field##dim##d_##t.def(                                                       \
@@ -96,6 +77,13 @@ PYBIND11_MODULE(_parafields, m)
 {
   m.doc() =
     "The parafields Python package for (parallel) parameter field generation";
+
+#if !MPI_IS_FAKEMPI
+  // import the mpi4py API
+  if (import_mpi4py() < 0) {
+    throw std::runtime_error("Could not load mpi4py API.");
+  }
+#endif
 
   // Expose the Dune::ParameterTree class to allow the Python side to
   // easily feed data into the C++ code.

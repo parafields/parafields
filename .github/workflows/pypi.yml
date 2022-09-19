@@ -34,8 +34,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install MPI
+        run: |
+          sudo apt update
+          sudo apt install libopenmpi-dev
+
       - name: Build SDist
-        run: pipx run build --sdist
+        run: |
+          pipx run build --sdist
 
       - uses: actions/upload-artifact@v3
         with:

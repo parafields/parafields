@@ -66,7 +66,7 @@ testpaths = ["test"]
 
 # We remove the mpi4py dependency from the package, as our builds
 # are using wheels to provide a sequential version of the library
-before-all = "sed -i.bak 's|\"mpipy\",||g' pyproject.toml"
+before-all = "sed -i.bak 's|\"mpi4py\",||g' pyproject.toml"
 
 # Verbose output is helpful for understanding CI failures
 build-verbosity = 3

@@ -40,6 +40,10 @@ find_package(pybind11 REQUIRED)
 pybind11_add_module(_parafields src/parafields/_parafields.cpp)
 target_link_libraries(_parafields PUBLIC parafields::parafields
                                          pybind11::pybind11)
+target_include_directories(_parafields PUBLIC ${PROJECT_SOURCE_DIR}/include)
+if(MPI4PY_INCLUDE_DIR)
+  target_include_directories(_parafields PUBLIC ${MPI4PY_INCLUDE_DIR})
+endif()
 
 # Install the compiled modules in the correct location
 install(TARGETS _parafields DESTINATION .)
