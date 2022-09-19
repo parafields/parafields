@@ -9,6 +9,7 @@ requires = [
     "cmake>=3.15",
     "ninja",
     "pybind11[global]==2.9.2",
+    "mpi4py",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -33,15 +34,13 @@ classifiers = [
 dependencies = [
     "jsonschema<4",
     "matplotlib",
+    "mpi4py",
     "numpy",
 ]
 
 [project.optional-dependencies]
 jupyter = [
     "ipywidgets-jsonschema",
-]
-mpi = [
-    "mpi4py",
 ]
 tests = [
     "pytest",
@@ -64,6 +63,10 @@ testpaths = ["test"]
 # The variables in this section allow you to customize the process how the wheels
 # for the Python packages are built. For a list of options, see this
 # page: https://cibuildwheel.readthedocs.io/en/stable/options/
+
+# We remove the mpi4py dependency from the package, as our builds
+# are using wheels to provide a sequential version of the library
+before-all = "sed -i.bak 's|\"mpipy\",||g' pyproject.toml"
 
 # Verbose output is helpful for understanding CI failures
 build-verbosity = 3
