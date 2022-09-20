@@ -1,3 +1,6 @@
+# Exclude the setuptools_scm version file
+src/parafields/_version.py
+
 .vscode
 
 # Typical build directories

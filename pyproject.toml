@@ -37,6 +37,7 @@ dependencies = [
     "matplotlib",
     "mpi4py",
     "numpy",
+    "Pillow",
 ]
 
 [project.optional-dependencies]
@@ -48,7 +49,10 @@ docs = [
     "sphinx_rtd_theme",
 ]
 jupyter = [
+    "IPython",
+    "ipywidgets",
     "ipywidgets-jsonschema",
+    "wrapt",
 ]
 tests = [
     "pytest",
