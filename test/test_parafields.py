@@ -18,3 +18,21 @@ def test_generate(dim, dtype, seed):
     data = field.evaluate()
     for i in range(dim):
         assert data.shape[i] == 10
+
+    # Check that the field can be reproduced
+    field.seed = None
+    field.generate(seed=seed)
+    data2 = field.evaluate()
+
+    assert np.allclose(data, data2)
+
+
+def test_seed_is_none():
+    field = generate_field(seed=None)
+    arr1 = field.evaluate()
+
+    # Generate a second time
+    field.generate(seed=None)
+    arr2 = field.evaluate()
+
+    assert not np.allclose(arr1, arr2)
