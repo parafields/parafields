@@ -59,7 +59,7 @@ jobs:
         run: |
           python -m pip install -v .[tests,jupyter]
         env:
-          CMAKE_ARGS: "-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
+          CMAKE_ARGS: "--debug-output -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
 
       - name: Run test suite
         run: |

@@ -19,7 +19,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Configure and build our external dependencies
-configure_file(external.cmake.in external/CMakeLists.txt @ONLY)
+configure_file(cmake/external.cmake.in external/CMakeLists.txt @ONLY)
 execute_process(
   COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external COMMAND_ERROR_IS_FATAL ANY)

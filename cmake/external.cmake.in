@@ -19,6 +19,8 @@ if(( NOT MPI_FOUND ) OR (@FORCE_SEQUENTIAL@))
     USES_TERMINAL_DOWNLOAD 1
     USES_TERMINAL_CONFIGURE 1
     USES_TERMINAL_BUILD 1
+    BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release
+    INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
     CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fakempi-inst
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -42,47 +44,39 @@ if(@BUILD_SINGLE_PRECISION@)
     URL http://www.fftw.org/fftw-3.3.10.tar.gz
     URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
     SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3-float
-    CONFIGURE_COMMAND
-      ${CMAKE_COMMAND} -E chdir @CMAKE_BINARY_DIR@/fftw3-float
-      ${CMAKE_COMMAND} -E env CC=${CMAKE_C_COMPILER}
-      ${FAKEMPI_FFTW_CONFIGURE}
-      ./configure
-        --enable-static --disable-shared
-        --prefix=@CMAKE_BINARY_DIR@/fftw3-inst
-        --enable-single
-        --enable-mpi
-        --with-pic
-    INSTALL_COMMAND make install
+    PATCH_COMMAND ${CMAKE_COMMAND} -E copy @PROJECT_SOURCE_DIR@/cmake/fftw3-toplevel.cmake @CMAKE_BINARY_DIR@/fftw3-float/CMakeLists.txt
     INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
-    BUILD_IN_SOURCE ON
     USES_TERMINAL_DOWNLOAD 1
     USES_TERMINAL_CONFIGURE 1
     USES_TERMINAL_BUILD 1
+    CMAKE_ARGS
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      -DENABLE_MPI=ON
+      -DENABLE_FLOAT=ON
+      -DBUILD_SHARED_LIBS=OFF
+      -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fftw3-inst
+      ${FAKEMPI_CMAKE_ARG}
     DEPENDS ${FAKEMPI_DEP}
   )
   set(FFTW_DEP fftw3-float)
 endif()
 
-set(FFTW_DOUBLE_DEP)
 if(@BUILD_DOUBLE_PRECISION@)
   ExternalProject_add(fftw3-double
     URL http://www.fftw.org/fftw-3.3.10.tar.gz
     URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
     SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3-double
-    CONFIGURE_COMMAND
-      ${CMAKE_COMMAND} -E chdir @CMAKE_BINARY_DIR@/fftw3-double
-      ${FAKEMPI_FFTW_CONFIGURE}
-      ./configure
-        --enable-static --disable-shared
-        --prefix=@CMAKE_BINARY_DIR@/fftw3-inst
-        --enable-mpi
-        --with-pic
-    INSTALL_COMMAND make install
+    PATCH_COMMAND ${CMAKE_COMMAND} -E copy @PROJECT_SOURCE_DIR@/cmake/fftw3-toplevel.cmake @CMAKE_BINARY_DIR@/fftw3-double/CMakeLists.txt
     INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
-    BUILD_IN_SOURCE ON
     USES_TERMINAL_DOWNLOAD 1
     USES_TERMINAL_CONFIGURE 1
     USES_TERMINAL_BUILD 1
+    CMAKE_ARGS
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      -DENABLE_MPI=ON
+      -DBUILD_SHARED_LIBS=OFF
+      -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fftw3-inst
+      ${FAKEMPI_CMAKE_ARG}
     DEPENDS ${FAKEMPI_DEP}
   )
   set(FFTW_DEP fftw3-double ${FFTW_DEP})

@@ -41,7 +41,9 @@ repos:
     rev: v0.6.13
     hooks:
       - id: cmake-format
+        exclude: cmake/fftw3-toplevel.cmake
       - id: cmake-lint
+        exclude: cmake/fftw3-toplevel.cmake
 
   # Check Configuration as Code files for integrations
   - repo: https://github.com/python-jsonschema/check-jsonschema
@@ -59,9 +61,3 @@ repos:
         - --style=Mozilla
         exclude: ^ext/
         types_or: [c++]
-
-  # Check Configuration as Code files for integrations
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.18.3
-    hooks:
-      - id: check-github-workflows
