@@ -1,21 +1,13 @@
 import collections.abc
-import json
 import jsonschema
 import numpy as np
-import os
 import parafields._parafields as _parafields
 import time
 
 from matplotlib import cm
 from parafields.mpi import default_partitioning, MPI
+from parafields.utils import is_iterable, load_schema
 from PIL import Image
-
-
-def is_iterable(x):
-    """Decide whether x is a non-string iterable"""
-    if isinstance(x, str):
-        return False
-    return isinstance(x, collections.abc.Iterable)
 
 
 def dict_to_parameter_tree(data, tree=None, prefix=""):
@@ -32,15 +24,8 @@ def dict_to_parameter_tree(data, tree=None, prefix=""):
     return tree
 
 
-def load_schema():
-    # Load the schema file shipped with parafields
-    schema_file = os.path.join(os.path.dirname(__file__), "schema.json")
-    with open(schema_file, "r") as f:
-        return json.load(f)
-
-
 def validate_config(config):
-    """Validate the given configuration against the provided schema"""
+    """Validate a given configuration against the provided schema"""
 
     # Validate the given config against the schema
     schema = load_schema()
@@ -60,6 +45,76 @@ def generate_field(
     partitioning=None,
     comm=None,
 ):
+    """Main entry point for generating parafields parameter fields
+
+    :param cells:
+        The number of cells in each direction in the grid that defines the
+        random field resolution.
+    :type cells: list
+
+    :param extensions:
+        The extent of the physical domain that the random field is defined
+        on. This is only required if the random field is to be probed with
+        global coordinates.
+    :type list:
+
+    :param covariance:
+        The covariance structure that is used. `parafields` provides the
+        following choices:
+
+        * `exponential` (default choice)
+        * `gammaExponential` (not yet implemented)
+        * `separableExponential` (not yet implemented)
+        * `matern` (not yet implemented)
+        * `matern32` (not yet implemented)
+        * `matern52` (not yet implemented)
+        * `gaussian` (not yet implemented)
+        * `spherical` (not yet implemented)
+        * `cauchy` (not yet implemented)
+        * `generalizedCauchy` (not yet implemented)
+        * `cubic` (not yet implemented)
+        * `dampedOscillation` (not yet implemented)
+        * `whiteNoise` (not yet implemented)
+        * `custom-iso` (not yet implemented)
+        * `custom-aniso` (not yet implemented)
+    :type covariance: str
+
+    :param variance:
+        The variance of the random field.
+    :type variance: float
+
+    :param corrLength:
+        The correlation length of the field. This can either be a scalar for
+        an isotropic field or a list of length dimension for an anisotropic one.
+    :type corrLength: float
+
+    :param dtype:
+        The floating point type to use. If the matching C++ type has not been
+        compiled into the backend, an error is thrown.
+    :type dtype: np.dtype
+
+    :param seed:
+        The seed for the random number generator. This can either be an integer
+        to reproduce a field for the given seed or `None` which would generate
+        a new seed.
+    :type seed: int
+
+    :param partitioning:
+        The tuple with processors per direction. The product of all entries
+        is expected to match the number of processors in the communicator.
+        Alternatively, a function can be provided that accepts the number of
+        processors and the cell sizes as arguments.
+    :type partitioning:
+
+    :param comm:
+        The mpi4py communicator that should be used to distribute this
+        random field. Defaults to MPI_COMM_WORLD. Specifying this parameter
+        when using sequential builds for parafields results in an error.
+
+    :returns:
+        A random field instance.
+    :rtype: RandomField
+    """
     # The backend expects corrLength as a list
     if not is_iterable(corrLength):
         corrLength = [corrLength]
@@ -94,6 +149,36 @@ class RandomField:
     def __init__(
         self, config, dtype=np.float64, partitioning=None, comm=None, seed=None
     ):
+        """Create a random field from a ready backend configuration
+
+        :param config:
+            A nested dictionary containing a valid backend configuration.
+        :type config: dict
+
+        :param dtype:
+            The floating point type to use. If the matching C++ type has not been
+            compiled into the backend, an error is thrown.
+        :type dtype: np.dtype
+
+        :param comm:
+            The mpi4py communicator that should be used to distribute this
+            random field. Defaults to MPI_COMM_WORLD. Specifying this parameter
+            when using sequential builds for parafields results in an error.
+
+        :param partitioning:
+            The tuple with processors per direction. The product of all entries
+            is expected to match the number of processors in the communicator.
+            Alternatively, a function can be provided that accepts the number of
+            processors and the cell sizes as arguments.
+        :type partitioning: list
+
+        :param seed:
+            The seed for the random number generator. This can either be an integer
+            to reproduce a field for the given seed or `None` which would generate
+            a new seed.
+        :type seed: int
+        """
+
         # Validate the given config
         self.config = validate_config(config)
         self.seed = None
@@ -159,12 +244,22 @@ class RandomField:
             self._field.generate(seed)
 
     def evaluate(self):
+        """Evaluate the random field
+
+        :returns:
+            A numpy array of the evaluations of the random field on
+            the entire grid that the field is defined on.
+        :rtype: np.ndarray
+        """
+
         # Lazily evaluate the entire field
         if self._eval is None:
             self._eval = self._field.eval()
         return self._eval
 
     def _repr_png_(self):
+        """Print 2D random fields as images in Jupyter frontends"""
+
         # Evaluate the field
         eval_ = self.evaluate()
 

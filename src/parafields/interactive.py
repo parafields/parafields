@@ -67,7 +67,25 @@ def img_as_widget(img):
 
 
 def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
-    """Interactively explore field generation in a Jupyter notebook"""
+    """Interactively explore field generation in a Jupyter notebook
+
+    :param dtype:
+        The floating point type to use. If the matching C++ type has not been
+        compiled into the backend, an error is thrown.
+    :type dtype: np.dtype
+
+    :param comm:
+        The mpi4py communicator that should be used to distribute this
+        random field. Defaults to MPI_COMM_WORLD. Specifying this parameter
+        when using sequential builds for parafields results in an error.
+
+    :param partitioning:
+        The tuple with processors per direction. The product of all entries
+        is expected to match the number of processors in the communicator.
+        Alternatively, a function can be provided that accepts the number of
+        processors and the cell sizes as arguments.
+    :type partitioning: list
+    """
 
     # Return early if we do not have the extra
     if not HAVE_JUPYYER_EXTRA:

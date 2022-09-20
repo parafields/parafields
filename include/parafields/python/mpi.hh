@@ -6,6 +6,19 @@
 
 namespace parafields {
 
+/** @brief A thing wrapper for the MPI communicator
+ *
+ * This wrapper class is required in order to create bindings for
+ * the communicator class in pybind11. As the actual type of MPI_Comm
+ * depends on the MPI implementation (OpenMPI: void*, MPICH: int)
+ * directly using MPI_Comm in bindings would lead to a risk of
+ * clashes with other bindings for that type.
+ *
+ * This class solves the problem by providing a type that can be used
+ * in bindings, that implicitly casts to the actual communicator type.
+ *
+ * The concept is taken from https://stackoverflow.com/a/62449190
+ */
 struct MPI4PyCommunicator
 {
   MPI4PyCommunicator() = default;
@@ -21,6 +34,10 @@ struct MPI4PyCommunicator
 
 namespace pybind11::detail {
 
+/** The pybind11 type caster for MPI4PyCommunicator
+ *
+ * Taken from https://stackoverflow.com/a/62449190
+ */
 template<>
 struct type_caster<parafields::MPI4PyCommunicator>
 {
