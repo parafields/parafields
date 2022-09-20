@@ -6,6 +6,10 @@ sphinx:
 
 formats: all
 
+build:
+  apt_packages:
+    - libopenmpi-dev
+
 python:
   version: "3.8"
   install:
