@@ -65,3 +65,30 @@ jobs:
         if: matrix.parallel == 'ON'
         run: |
           mpirun --oversubscribe -np 4 python -m pytest --only-mpi
+
+  coverage:
+    name: Coverage Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checking out the repository
+        uses: actions/checkout@v3
+
+      - name: Installing system dependencies
+        run: |
+          sudo apt update
+          sudo apt install libopenmpi-dev
+
+      - name: Install parallel Python package
+        run: |
+          python -m pip install -v .[tests,jupyter]
+
+      - name: Run test suite
+        run: |
+          python -m pytest --cov --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          files: ./coverage.xml
