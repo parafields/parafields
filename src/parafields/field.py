@@ -5,8 +5,9 @@ import numpy as np
 import os
 import parafields._parafields as _parafields
 
-from matplotlib import pyplot as plt
+from matplotlib import cm
 from parafields.mpi import default_partitioning, MPI
+from PIL import Image
 
 
 def is_iterable(x):
@@ -143,21 +144,12 @@ class RandomField:
         return self._eval
 
     def _repr_png_(self):
+        # Evaluate the field
         eval_ = self.evaluate()
-        plt.imshow(eval_, interpolation="nearest")
 
+        # If this is not 2D, we skip visualization
+        if len(eval_.shape) != 2:
+            return
 
-def interactive_field_generation():
-    """Interactively explore field generation in a Jupyter notebook"""
-
-    # Check whether the extra requirements were installed
-    try:
-        import ipywidgets_jsonschema
-    except ImportError:
-        print("Please re-run pip installation with 'parafields[jupyter]'")
-        return
-
-    # Create widgets for the configuration
-    schema = load_schema()
-    form = ipywidgets_jsonschema.Form(schema)
-    form.show()
+        # Convert to PIL array
+        return Image.fromarray(np.uint8(cm.gist_earth(eval_) * 255))

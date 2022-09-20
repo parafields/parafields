@@ -37,12 +37,8 @@ def _default_partitioning(i, size, P, dims, trydims, opt):
 
             if m < opt:
                 opt = m
-                print(f"Update with {dims}")
                 dims[:] = trydims[:]
-            else:
-                print("Failed optimality")
-        else:
-            print("DARNG")
+
     return opt
 
 
