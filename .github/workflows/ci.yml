@@ -18,9 +18,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.9"]
         parallel: ["ON", "OFF"]
+        exclude:
+          - os: windows-latest
+            parallel: "ON"
 
     steps:
       - name: Checking out the repository
@@ -44,6 +47,7 @@ jobs:
 
       - name: Install sequential Python package
         if: matrix.parallel == 'OFF'
+        shell: bash
         run: |
           sed -i.bak 's|"mpi4py",||g' pyproject.toml
           python -m pip install -v .[tests,jupyter]
