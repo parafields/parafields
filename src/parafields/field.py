@@ -4,6 +4,7 @@ import jsonschema
 import numpy as np
 import os
 import parafields._parafields as _parafields
+import time
 
 from matplotlib import cm
 from parafields.mpi import default_partitioning, MPI
@@ -45,9 +46,6 @@ def validate_config(config):
     schema = load_schema()
     jsonschema.validate(instance=config, schema=schema)
 
-    # Perform some additional validations not part of the schema
-    assert len(config["grid"]["extensions"]) == len(config["grid"]["cells"])
-
     return config
 
 
@@ -78,7 +76,9 @@ def generate_field(
     }
 
     # Return the Python class representing the field
-    return RandomField(config, dtype=dtype, partitioning=partitioning, comm=comm)
+    return RandomField(
+        config, dtype=dtype, partitioning=partitioning, comm=comm, seed=seed
+    )
 
 
 # A mapping of numpy types to C++ type names
@@ -91,9 +91,12 @@ available_types = {
 
 
 class RandomField:
-    def __init__(self, config, dtype=np.float64, partitioning=None, comm=None):
+    def __init__(
+        self, config, dtype=np.float64, partitioning=None, comm=None, seed=None
+    ):
         # Validate the given config
         self.config = validate_config(config)
+        self.seed = None
 
         # Ensure that the given dtype is supported by parafields
         if dtype not in possible_types:
@@ -102,9 +105,6 @@ class RandomField:
             raise NotImplementedError(
                 "parafields was not compiler for dtype, but could be!"
             )
-
-        # Extract the seed from the configuration
-        seed = self.config.get("seed", 0)
 
         # Extract the partitioning (function)
         if partitioning is None:
@@ -132,10 +132,31 @@ class RandomField:
             )
 
         # Trigger the generation process
-        self._field.generate(seed)
+        self.generate(seed=seed)
 
         # Storage for lazy evaluation
         self._eval = None
+
+    def generate(self, seed=None):
+        """Regenerate the field with the given seed
+
+        :param seed:
+            The seed to use. If seed is None, a new seed will be used
+            on every call.
+        :type seed: int
+        """
+
+        # Maybe create a new seed
+        if seed is None:
+            seed = time.clock_gettime_ns(0) % (2**32)
+
+        # Maybe invalidate any evaluations we have cached
+        if seed != self.seed:
+            self._eval = None
+            self.seed = seed
+
+            # Trigger field generation in the backend
+            self._field.generate(seed)
 
     def evaluate(self):
         # Lazily evaluate the entire field
