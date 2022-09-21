@@ -5,7 +5,7 @@ import pybind11
 cmake_args = [
     f"-DCMAKE_PREFIX_PATH={pybind11.get_cmake_dir()}",
     "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON",
-    "-DBUILD_SINGLE_PRECISION=ON",
+    "-DBUILD_SINGLE_PRECISION=OFF",
     "-DBUILD_DOUBLE_PRECISION=ON",
 ]
 

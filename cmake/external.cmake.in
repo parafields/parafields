@@ -100,11 +100,11 @@ ExternalProject_add(dune-common
   DEPENDS ${FAKEMPI_DEP}
 )
 
-ExternalProject_add(core
+ExternalProject_add(parafields-core
   GIT_REPOSITORY https://github.com/parafields/parafields-core.git
   GIT_TAG main
-  SOURCE_DIR @CMAKE_BINARY_DIR@/core
-  INSTALL_DIR @CMAKE_BINARY_DIR@/core-inst
+  SOURCE_DIR @CMAKE_BINARY_DIR@/parafields-core
+  INSTALL_DIR @CMAKE_BINARY_DIR@/parafields-core-inst
   UPDATE_COMMAND ""
   USES_TERMINAL_DOWNLOAD 1
   USES_TERMINAL_CONFIGURE 1
@@ -113,7 +113,7 @@ ExternalProject_add(core
     -DCMAKE_BUILD_TYPE=Release
     -DFFTW_ROOT=@CMAKE_BINARY_DIR@/fftw3-inst
     -Ddune-common_ROOT=@CMAKE_BINARY_DIR@/dune-inst
-    -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/core-inst
+    -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/parafields-core-inst
     ${FAKEMPI_CMAKE_ARG}
     -DCMAKE_DISABLE_FIND_PACKAGE_GSL=ON
     -DBUILD_APP=OFF
