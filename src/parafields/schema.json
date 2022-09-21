@@ -4,18 +4,137 @@
       "properties": {
         "embedding": {
           "description": "Options for circulant embedding and periodization",
+          "else": {
+            "else": {
+              "else": {
+                "else": {
+                  "else": {
+                    "if": {
+                      "properties": {
+                        "periodization": {
+                          "const": "merge"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "sigmoidCombine": {
+                          "default": "radialPlus",
+                          "enum": [
+                            "radial",
+                            "radialPlus",
+                            "tensor"
+                          ],
+                          "title": "Sigmoid combine",
+                          "type": "string"
+                        },
+                        "sigmoidEnd": {
+                          "default": 1.0,
+                          "title": "Sigmoid end",
+                          "type": "number"
+                        },
+                        "sigmoidStart": {
+                          "default": 1.0,
+                          "title": "Sigmoid start",
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "periodization": {
+                        "const": "cofold"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "cofoldMaxFactor": {
+                        "default": 5.0,
+                        "title": "Cofold max factor",
+                        "type": "number"
+                      }
+                    }
+                  }
+                },
+                "if": {
+                  "properties": {
+                    "periodization": {
+                      "const": "fold"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "foldMaxFactor": {
+                      "default": 1.0,
+                      "title": "Fold max factor",
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "if": {
+                "properties": {
+                  "periodization": {
+                    "const": "merge"
+                  },
+                  "sigmoid": {
+                    "const": "smoothstep"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "mergeRecursions": {
+                    "default": 99,
+                    "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
+                    "minimum": 1,
+                    "title": "Merge-smoothstep recursions",
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            "if": {
+              "properties": {
+                "periodization": {
+                  "const": "fold"
+                },
+                "sigmoid": {
+                  "const": "smoothstep"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "foldRecursions": {
+                  "default": 99,
+                  "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
+                  "minimum": 1,
+                  "title": "Fold-smoothstep recursions",
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "periodization": {
+                "const": "cofold"
+              },
+              "sigmoid": {
+                "const": "smoothstep"
+              }
+            }
+          },
           "properties": {
             "approximate": {
-              "default": false,
+              "default": true,
               "description": "Whether to accept approximate results or not. Simply sets negative eigenvalues to zero if they occur.",
               "title": "Approximate results",
               "type": "boolean"
-            },
-            "cofoldRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
             },
             "factor": {
               "default": 2,
@@ -23,29 +142,6 @@
               "minimum": 1,
               "title": "Embedding Factor",
               "type": "integer"
-            },
-            "foldRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
-            },
-            "mergeRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
-            },
-            "optim": {
-              "default": "none",
-              "description": "Optimization strategy to find non-negative embedding",
-              "enum": [
-                "none",
-                "coneopt",
-                "dualopt"
-              ],
-              "title": "Optimization strategy",
-              "type": "string"
             },
             "periodization": {
               "default": "classical",
@@ -76,7 +172,29 @@
               "type": "number"
             }
           },
+          "then": {
+            "properties": {
+              "cofoldRecursions": {
+                "default": 1,
+                "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function",
+                "minimum": 1,
+                "title": "Cofold-smoothstep recursions",
+                "type": "integer"
+              }
+            }
+          },
           "title": "Embedding",
+          "type": "object"
+        },
+        "fftw": {
+          "properties": {
+            "transposed": {
+              "default": false,
+              "title": "FFTW transposition",
+              "type": "boolean"
+            }
+          },
+          "title": "FFTW Configuration",
           "type": "object"
         },
         "grid": {
@@ -118,22 +236,6 @@
           "title": "Grid",
           "type": "object"
         },
-        "mean": {
-          "properties": {
-            "mean": {
-              "default": 0.5,
-              "title": "Mean of trend component",
-              "type": "number"
-            },
-            "variance": {
-              "default": 0.01,
-              "title": "Variance of trend component",
-              "type": "number"
-            }
-          },
-          "title": "Mean trend component of the field",
-          "type": "object"
-        },
         "randomField": {
           "properties": {
             "cacheInvMatvec": {
@@ -158,25 +260,70 @@
               "description": "Setting periodic boundary conditions sets embedding.factor = 1, i.e. behavior can't be controlled per boundary segment and correlation length must be small enough",
               "title": "Periodicity",
               "type": "boolean"
-            },
-            "transform": {
-              "default": "none",
-              "description": "Transformation applied to Gaussian random field",
-              "enum": [
-                "none",
-                "logNormal",
-                "foldedNormal",
-                "sign",
-                "boxCox"
-              ],
-              "title": "Transformation",
-              "type": "string"
             }
           },
           "title": "General Options for random field",
           "type": "object"
         },
         "stochastic": {
+          "else": {
+            "else": {
+              "if": {
+                "properties": {
+                  "covariance": {
+                    "const": "generalizedCauchy"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "cauchyAlpha": {
+                    "default": 1.0,
+                    "exclusiveMinimum": 0.0,
+                    "maximum": 2.0,
+                    "title": "Cauchy Alpha",
+                    "type": "number"
+                  },
+                  "cauchyBeta": {
+                    "default": 1.0,
+                    "exclusiveMinimum": 0.0,
+                    "title": "Cauchy Beta",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "cauchyAlpha",
+                  "cauchyBeta"
+                ]
+              }
+            },
+            "if": {
+              "properties": {
+                "covariance": {
+                  "const": "gammaExponential"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "expGamma": {
+                  "default": 1.0,
+                  "title": "Exponential Gamma",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "expGamma"
+              ]
+            }
+          },
+          "if": {
+            "properties": {
+              "covariance": {
+                "const": "matern"
+              }
+            }
+          },
           "properties": {
             "anisotropy": {
               "default": "none",
@@ -198,6 +345,7 @@
                 "exclusiveMinimum": 0.0,
                 "type": "number"
               },
+              "maxItems": 1,
               "minItems": 1,
               "title": "Correlation length",
               "type": "array"
@@ -217,9 +365,7 @@
                 "generalizedCauchy",
                 "cubic",
                 "dampedOscillation",
-                "whiteNoise",
-                "custom-iso",
-                "custom-aniso"
+                "whiteNoise"
               ],
               "title": "Covariance structure",
               "type": "string"
@@ -235,6 +381,18 @@
             "variance",
             "covariance"
           ],
+          "then": {
+            "properties": {
+              "maternNu": {
+                "default": 1.0,
+                "title": "Matern Nu",
+                "type": "number"
+              }
+            },
+            "required": [
+              "maternNu"
+            ]
+          },
           "title": "Stochastic part of field",
           "type": "object"
         }
@@ -250,18 +408,137 @@
       "properties": {
         "embedding": {
           "description": "Options for circulant embedding and periodization",
+          "else": {
+            "else": {
+              "else": {
+                "else": {
+                  "else": {
+                    "if": {
+                      "properties": {
+                        "periodization": {
+                          "const": "merge"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "sigmoidCombine": {
+                          "default": "radialPlus",
+                          "enum": [
+                            "radial",
+                            "radialPlus",
+                            "tensor"
+                          ],
+                          "title": "Sigmoid combine",
+                          "type": "string"
+                        },
+                        "sigmoidEnd": {
+                          "default": 1.0,
+                          "title": "Sigmoid end",
+                          "type": "number"
+                        },
+                        "sigmoidStart": {
+                          "default": 1.0,
+                          "title": "Sigmoid start",
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "periodization": {
+                        "const": "cofold"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "cofoldMaxFactor": {
+                        "default": 5.0,
+                        "title": "Cofold max factor",
+                        "type": "number"
+                      }
+                    }
+                  }
+                },
+                "if": {
+                  "properties": {
+                    "periodization": {
+                      "const": "fold"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "foldMaxFactor": {
+                      "default": 1.0,
+                      "title": "Fold max factor",
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "if": {
+                "properties": {
+                  "periodization": {
+                    "const": "merge"
+                  },
+                  "sigmoid": {
+                    "const": "smoothstep"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "mergeRecursions": {
+                    "default": 99,
+                    "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
+                    "minimum": 1,
+                    "title": "Merge-smoothstep recursions",
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            "if": {
+              "properties": {
+                "periodization": {
+                  "const": "fold"
+                },
+                "sigmoid": {
+                  "const": "smoothstep"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "foldRecursions": {
+                  "default": 99,
+                  "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
+                  "minimum": 1,
+                  "title": "Fold-smoothstep recursions",
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "periodization": {
+                "const": "cofold"
+              },
+              "sigmoid": {
+                "const": "smoothstep"
+              }
+            }
+          },
           "properties": {
             "approximate": {
-              "default": false,
+              "default": true,
               "description": "Whether to accept approximate results or not. Simply sets negative eigenvalues to zero if they occur.",
               "title": "Approximate results",
               "type": "boolean"
-            },
-            "cofoldRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
             },
             "factor": {
               "default": 2,
@@ -269,29 +546,6 @@
               "minimum": 1,
               "title": "Embedding Factor",
               "type": "integer"
-            },
-            "foldRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
-            },
-            "mergeRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
-            },
-            "optim": {
-              "default": "none",
-              "description": "Optimization strategy to find non-negative embedding",
-              "enum": [
-                "none",
-                "coneopt",
-                "dualopt"
-              ],
-              "title": "Optimization strategy",
-              "type": "string"
             },
             "periodization": {
               "default": "classical",
@@ -322,7 +576,29 @@
               "type": "number"
             }
           },
+          "then": {
+            "properties": {
+              "cofoldRecursions": {
+                "default": 1,
+                "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function",
+                "minimum": 1,
+                "title": "Cofold-smoothstep recursions",
+                "type": "integer"
+              }
+            }
+          },
           "title": "Embedding",
+          "type": "object"
+        },
+        "fftw": {
+          "properties": {
+            "transposed": {
+              "default": true,
+              "title": "FFTW transposition",
+              "type": "boolean"
+            }
+          },
+          "title": "FFTW Configuration",
           "type": "object"
         },
         "grid": {
@@ -366,22 +642,6 @@
           "title": "Grid",
           "type": "object"
         },
-        "mean": {
-          "properties": {
-            "mean": {
-              "default": 0.5,
-              "title": "Mean of trend component",
-              "type": "number"
-            },
-            "variance": {
-              "default": 0.01,
-              "title": "Variance of trend component",
-              "type": "number"
-            }
-          },
-          "title": "Mean trend component of the field",
-          "type": "object"
-        },
         "randomField": {
           "properties": {
             "cacheInvMatvec": {
@@ -406,25 +666,70 @@
               "description": "Setting periodic boundary conditions sets embedding.factor = 1, i.e. behavior can't be controlled per boundary segment and correlation length must be small enough",
               "title": "Periodicity",
               "type": "boolean"
-            },
-            "transform": {
-              "default": "none",
-              "description": "Transformation applied to Gaussian random field",
-              "enum": [
-                "none",
-                "logNormal",
-                "foldedNormal",
-                "sign",
-                "boxCox"
-              ],
-              "title": "Transformation",
-              "type": "string"
             }
           },
           "title": "General Options for random field",
           "type": "object"
         },
         "stochastic": {
+          "else": {
+            "else": {
+              "if": {
+                "properties": {
+                  "covariance": {
+                    "const": "generalizedCauchy"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "cauchyAlpha": {
+                    "default": 1.0,
+                    "exclusiveMinimum": 0.0,
+                    "maximum": 2.0,
+                    "title": "Cauchy Alpha",
+                    "type": "number"
+                  },
+                  "cauchyBeta": {
+                    "default": 1.0,
+                    "exclusiveMinimum": 0.0,
+                    "title": "Cauchy Beta",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "cauchyAlpha",
+                  "cauchyBeta"
+                ]
+              }
+            },
+            "if": {
+              "properties": {
+                "covariance": {
+                  "const": "gammaExponential"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "expGamma": {
+                  "default": 1.0,
+                  "title": "Exponential Gamma",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "expGamma"
+              ]
+            }
+          },
+          "if": {
+            "properties": {
+              "covariance": {
+                "const": "matern"
+              }
+            }
+          },
           "properties": {
             "anisotropy": {
               "default": "none",
@@ -446,6 +751,7 @@
                 "exclusiveMinimum": 0.0,
                 "type": "number"
               },
+              "maxItems": 1,
               "minItems": 1,
               "title": "Correlation length",
               "type": "array"
@@ -465,9 +771,7 @@
                 "generalizedCauchy",
                 "cubic",
                 "dampedOscillation",
-                "whiteNoise",
-                "custom-iso",
-                "custom-aniso"
+                "whiteNoise"
               ],
               "title": "Covariance structure",
               "type": "string"
@@ -483,6 +787,18 @@
             "variance",
             "covariance"
           ],
+          "then": {
+            "properties": {
+              "maternNu": {
+                "default": 1.0,
+                "title": "Matern Nu",
+                "type": "number"
+              }
+            },
+            "required": [
+              "maternNu"
+            ]
+          },
           "title": "Stochastic part of field",
           "type": "object"
         }
@@ -498,18 +814,137 @@
       "properties": {
         "embedding": {
           "description": "Options for circulant embedding and periodization",
+          "else": {
+            "else": {
+              "else": {
+                "else": {
+                  "else": {
+                    "if": {
+                      "properties": {
+                        "periodization": {
+                          "const": "merge"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "sigmoidCombine": {
+                          "default": "radialPlus",
+                          "enum": [
+                            "radial",
+                            "radialPlus",
+                            "tensor"
+                          ],
+                          "title": "Sigmoid combine",
+                          "type": "string"
+                        },
+                        "sigmoidEnd": {
+                          "default": 1.0,
+                          "title": "Sigmoid end",
+                          "type": "number"
+                        },
+                        "sigmoidStart": {
+                          "default": 1.0,
+                          "title": "Sigmoid start",
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "periodization": {
+                        "const": "cofold"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "cofoldMaxFactor": {
+                        "default": 5.0,
+                        "title": "Cofold max factor",
+                        "type": "number"
+                      }
+                    }
+                  }
+                },
+                "if": {
+                  "properties": {
+                    "periodization": {
+                      "const": "fold"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "foldMaxFactor": {
+                      "default": 1.0,
+                      "title": "Fold max factor",
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "if": {
+                "properties": {
+                  "periodization": {
+                    "const": "merge"
+                  },
+                  "sigmoid": {
+                    "const": "smoothstep"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "mergeRecursions": {
+                    "default": 99,
+                    "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
+                    "minimum": 1,
+                    "title": "Merge-smoothstep recursions",
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            "if": {
+              "properties": {
+                "periodization": {
+                  "const": "fold"
+                },
+                "sigmoid": {
+                  "const": "smoothstep"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "foldRecursions": {
+                  "default": 99,
+                  "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
+                  "minimum": 1,
+                  "title": "Fold-smoothstep recursions",
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "periodization": {
+                "const": "cofold"
+              },
+              "sigmoid": {
+                "const": "smoothstep"
+              }
+            }
+          },
           "properties": {
             "approximate": {
-              "default": false,
+              "default": true,
               "description": "Whether to accept approximate results or not. Simply sets negative eigenvalues to zero if they occur.",
               "title": "Approximate results",
               "type": "boolean"
-            },
-            "cofoldRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
             },
             "factor": {
               "default": 2,
@@ -517,29 +952,6 @@
               "minimum": 1,
               "title": "Embedding Factor",
               "type": "integer"
-            },
-            "foldRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
-            },
-            "mergeRecursions": {
-              "default": 99,
-              "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function (magic value 99: heuristic for certain covariance functions)",
-              "minimum": 1,
-              "type": "integer"
-            },
-            "optim": {
-              "default": "none",
-              "description": "Optimization strategy to find non-negative embedding",
-              "enum": [
-                "none",
-                "coneopt",
-                "dualopt"
-              ],
-              "title": "Optimization strategy",
-              "type": "string"
             },
             "periodization": {
               "default": "classical",
@@ -570,7 +982,29 @@
               "type": "number"
             }
           },
+          "then": {
+            "properties": {
+              "cofoldRecursions": {
+                "default": 1,
+                "description": "Number of recursions (and therefore smoothness) for smoothstep sigmoid function",
+                "minimum": 1,
+                "title": "Cofold-smoothstep recursions",
+                "type": "integer"
+              }
+            }
+          },
           "title": "Embedding",
+          "type": "object"
+        },
+        "fftw": {
+          "properties": {
+            "transposed": {
+              "default": true,
+              "title": "FFTW transposition",
+              "type": "boolean"
+            }
+          },
+          "title": "FFTW Configuration",
           "type": "object"
         },
         "grid": {
@@ -616,22 +1050,6 @@
           "title": "Grid",
           "type": "object"
         },
-        "mean": {
-          "properties": {
-            "mean": {
-              "default": 0.5,
-              "title": "Mean of trend component",
-              "type": "number"
-            },
-            "variance": {
-              "default": 0.01,
-              "title": "Variance of trend component",
-              "type": "number"
-            }
-          },
-          "title": "Mean trend component of the field",
-          "type": "object"
-        },
         "randomField": {
           "properties": {
             "cacheInvMatvec": {
@@ -656,25 +1074,70 @@
               "description": "Setting periodic boundary conditions sets embedding.factor = 1, i.e. behavior can't be controlled per boundary segment and correlation length must be small enough",
               "title": "Periodicity",
               "type": "boolean"
-            },
-            "transform": {
-              "default": "none",
-              "description": "Transformation applied to Gaussian random field",
-              "enum": [
-                "none",
-                "logNormal",
-                "foldedNormal",
-                "sign",
-                "boxCox"
-              ],
-              "title": "Transformation",
-              "type": "string"
             }
           },
           "title": "General Options for random field",
           "type": "object"
         },
         "stochastic": {
+          "else": {
+            "else": {
+              "if": {
+                "properties": {
+                  "covariance": {
+                    "const": "generalizedCauchy"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "cauchyAlpha": {
+                    "default": 1.0,
+                    "exclusiveMinimum": 0.0,
+                    "maximum": 2.0,
+                    "title": "Cauchy Alpha",
+                    "type": "number"
+                  },
+                  "cauchyBeta": {
+                    "default": 1.0,
+                    "exclusiveMinimum": 0.0,
+                    "title": "Cauchy Beta",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "cauchyAlpha",
+                  "cauchyBeta"
+                ]
+              }
+            },
+            "if": {
+              "properties": {
+                "covariance": {
+                  "const": "gammaExponential"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "expGamma": {
+                  "default": 1.0,
+                  "title": "Exponential Gamma",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "expGamma"
+              ]
+            }
+          },
+          "if": {
+            "properties": {
+              "covariance": {
+                "const": "matern"
+              }
+            }
+          },
           "properties": {
             "anisotropy": {
               "default": "none",
@@ -696,6 +1159,7 @@
                 "exclusiveMinimum": 0.0,
                 "type": "number"
               },
+              "maxItems": 1,
               "minItems": 1,
               "title": "Correlation length",
               "type": "array"
@@ -713,11 +1177,8 @@
                 "spherical",
                 "cauchy",
                 "generalizedCauchy",
-                "cubic",
                 "dampedOscillation",
-                "whiteNoise",
-                "custom-iso",
-                "custom-aniso"
+                "whiteNoise"
               ],
               "title": "Covariance structure",
               "type": "string"
@@ -733,6 +1194,18 @@
             "variance",
             "covariance"
           ],
+          "then": {
+            "properties": {
+              "maternNu": {
+                "default": 1.0,
+                "title": "Matern Nu",
+                "type": "number"
+              }
+            },
+            "required": [
+              "maternNu"
+            ]
+          },
           "title": "Stochastic part of field",
           "type": "object"
         }

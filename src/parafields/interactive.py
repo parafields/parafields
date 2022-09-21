@@ -16,7 +16,7 @@ except ImportError:
     HAVE_JUPYYER_EXTRA = False
 
 
-def return_proxy(creator, widgets):
+def return_proxy(creator):
     """A transparent proxy that can be returned from Jupyter UIs
 
     The created proxy object solves the general problem of needing to non-blockingly
@@ -34,6 +34,9 @@ def return_proxy(creator, widgets):
     """
 
     class ObjectProxy(wrapt.ObjectProxy):
+        def _update_(self):
+            self.__wrapped__ = creator()
+
         def __copy__(self):
             return ObjectProxy(copy.copy(self.__wrapped__))
 
@@ -42,16 +45,6 @@ def return_proxy(creator, widgets):
 
     # Create a new proxy object by calling the creator once
     proxy = ObjectProxy(creator())
-
-    # Define a handler that updates the proxy
-    def _update_proxy(_):
-        proxy.__wrapped__ = creator()
-
-    # Register handler that triggers proxy update
-    for widget in widgets:
-        widget.observe(
-            _update_proxy, names=("value", "selected_index", "data"), type="change"
-        )
 
     return proxy
 
@@ -96,12 +89,10 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
     form = ipywidgets_jsonschema.Form(load_schema())
 
     # Output proxy object
-    proxy = return_proxy(
-        lambda: RandomField(
-            form.data, comm=comm, partitioning=partitioning, dtype=dtype
-        ),
-        [form],
-    )
+    def _creator():
+        return RandomField(form.data, comm=comm, partitioning=partitioning, dtype=dtype)
+
+    proxy = return_proxy(_creator)
 
     # Image widget for output
     imagebox = ipywidgets.Box()
@@ -112,6 +103,7 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
     )
 
     def _realize(_):
+        proxy._update_()
         imagebox.children = [img_as_widget(proxy._repr_png_())]
 
     realize.on_click(_realize)
