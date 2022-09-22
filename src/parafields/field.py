@@ -39,7 +39,19 @@ def generate_field(
     extensions=(1.0, 1.0),
     covariance="exponential",
     variance=1.0,
-    corrLength=0.05,
+    corrLength=[0.05],
+    embedding_factor=2,
+    embedding_type="classical",
+    sigmoid_function="smoothstep",
+    threshold=1e-14,
+    approximate=True,
+    fftw_transpose=None,
+    cacheInvMatvec=True,
+    cacheInvRootMatvec=False,
+    cg_iterations=100,
+    cauchy_alpha=1.0,
+    cauchy_beta=1.0,
+    exp_gamma=1.0,
     dtype=np.float64,
     seed=0,
     partitioning=None,
@@ -63,20 +75,18 @@ def generate_field(
         following choices:
 
         * `exponential` (default choice)
-        * `gammaExponential` (not yet implemented)
-        * `separableExponential` (not yet implemented)
-        * `matern` (not yet implemented)
-        * `matern32` (not yet implemented)
-        * `matern52` (not yet implemented)
-        * `gaussian` (not yet implemented)
-        * `spherical` (not yet implemented)
-        * `cauchy` (not yet implemented)
-        * `generalizedCauchy` (not yet implemented)
-        * `cubic` (not yet implemented)
-        * `dampedOscillation` (not yet implemented)
-        * `whiteNoise` (not yet implemented)
-        * `custom-iso` (not yet implemented)
-        * `custom-aniso` (not yet implemented)
+        * `gammaExponential` (requires parameter `gammaExp`)
+        * `separableExponential`
+        * `matern` (requires parameter `maternNu`)
+        * `matern32`
+        * `matern52`
+        * `gaussian`
+        * `spherical`
+        * `cauchy`
+        * `generalizedCauchy`
+        * `cubic`
+        * `dampedOscillation`
+        * `whiteNoise`
     :type covariance: str
 
     :param variance:
@@ -87,6 +97,65 @@ def generate_field(
         The correlation length of the field. This can either be a scalar for
         an isotropic field or a list of length dimension for an anisotropic one.
     :type corrLength: float
+
+    :param periodic:
+        Whether the field should be periodic. Setting periodic boundary
+        conditions sets embedding.factor = 1, i.e. behavior can't be
+        controlled per boundary segment and correlation length must be
+        small enough.
+    :type periodic: bool
+
+    :param embedding_factor:
+        Relative size of extended domain (per dimension).
+    :type embedding_factor: int
+
+    :param embedding_type:
+        Type of embedding. Can be one of "classical", "merge",
+        "fold" or "cofold".
+    :type embedding_factor: str
+
+    :param sigmoid_function:
+        Sigmoid function for merging, resp. smooth max for folding.
+        Can be one of "smooth" or "smoothstep".
+        smoothstep is better, but requires choice for recursion level.
+    :type sigmoid_function: str
+
+    :param threshold:
+        Threshold for considering eigenvalues as negative
+    :type threshold: float
+
+    :param approximate:
+        Whether to accept approximate results or not.
+        Simply sets negative eigenvalues to zero if they occur.
+    :type approximate: bool
+
+    :param fftw_transpose:
+        Whether FFTW should do transposed transforms.
+    :type fftw_transpose: bool
+
+    :param cacheInvMatvec:
+        Whether matvecs with inverse covariance matrix are cached
+    :type cacheInvMatvec: bool
+
+    :param cacheInvRootMatvec:
+        Whether matvecs with approximate root of inv. cov. matrix are cached
+    :type cacheInvMatvec: bool
+
+    :param cg_iterations:
+        Conjugate Gradients iterations for matrix inverse multiplication
+    :type cg_iterations: int
+
+    :param cauchy_alpha:
+        The Cauchy Alpha parameter for generalizedCauchy covariance
+    :type cauchy_alpha: float
+
+    :param cauchy_beta:
+        The Cauchy Beta parameter for generalizedCauchy covariance
+    :type cauchy_beta: float
+
+    :param exp_gamma:
+        The gamma value for gammaExponential covariance
+    :type exp_gamma: float
 
     :param dtype:
         The floating point type to use. If the matching C++ type has not been
@@ -115,9 +184,9 @@ def generate_field(
         A random field instance.
     :rtype: RandomField
     """
-    # The backend expects corrLength as a list
-    if not is_iterable(corrLength):
-        corrLength = [corrLength]
+
+    if fftw_transpose is None:
+        fftw_transpose = len(cells) > 1
 
     # Create the backend configuration
     config = {
@@ -126,8 +195,23 @@ def generate_field(
             "corrLength": corrLength,
             "covariance": covariance,
             "variance": variance,
+            "cauchyAlpha": cauchy_alpha,
+            "cauchyBeta": cauchy_beta,
+            "expGamma": exp_gamma,
         },
-        "seed": seed,
+        "embedding": {
+            "approximate": approximate,
+            "factor": embedding_factor,
+            "periodization": embedding_type,
+            "sigmoid": sigmoid_function,
+            "threshold": threshold,
+        },
+        "fftw": {"transposed": fftw_transpose},
+        "randomField": {
+            "cacheInvMatvec": cacheInvMatvec,
+            "cacheInvRootMatvec": cacheInvRootMatvec,
+            "cg_iterations": cg_iterations,
+        },
     }
 
     # Return the Python class representing the field
@@ -213,7 +297,7 @@ class RandomField:
             self._field = FieldType(dict_to_parameter_tree(self.config))
         else:
             self._field = FieldType(
-                dict_to_parameter_tree(self.config), partitioning, comm
+                dict_to_parameter_tree(self.config), list(partitioning), comm
             )
 
         # Trigger the generation process
