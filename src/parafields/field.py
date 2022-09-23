@@ -319,7 +319,7 @@ class RandomField:
 
         # Maybe create a new seed
         if seed is None:
-            seed = time.clock_gettime_ns(0) % (2**32)
+            seed = time.time_ns() % (2**32)
 
         # Maybe invalidate any evaluations we have cached
         if seed != self.seed:
