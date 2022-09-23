@@ -24,6 +24,14 @@ The following options are supported in the backend but not yet in the Python bin
   sign function (excursion set)
 * Coarsening and refinement of random fields for multigrid/-scale methods
 
+## Usage
+
+This is a minimal usage example of the `parafields` package:
+
+![Minimum usage example](parafields.gif)
+
+For more examples, check out the [parafields documentation](https://parafields.readthedocs.io/).
+
 ## Installation
 
 `parafields` is available from PyPI and can be installed using `pip`:
@@ -49,12 +57,6 @@ Additionally, `parafields` defines the following optional dependency sets:
 * `docs`: All requirements for buildings `parafields`'s Sphinx documentation
 
 These optional dependencies can be installed by installing e.g. `parafields[jupyter]`.
-
-## Usage
-
-This is a minimal usage example of the `parafields` package:
-
-TODO: Insert GIF
 
 ## Acknowledgments
 
