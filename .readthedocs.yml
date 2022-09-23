@@ -14,4 +14,4 @@ python:
   version: "3.8"
   install:
     - method: pip
-      path: .[docs]
+      path: .[docs,jupyter]

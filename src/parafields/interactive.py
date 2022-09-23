@@ -49,16 +49,6 @@ def return_proxy(creator):
     return proxy
 
 
-def img_as_widget(img):
-    """Create an image widget from a PIL.Image"""
-
-    # Create and fill in-memory stream
-    membuf = io.BytesIO()
-    img.save(membuf, format="png")
-
-    return ipywidgets.Image(value=membuf.getvalue(), format="png")
-
-
 def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
     """Interactively explore field generation in a Jupyter notebook
 
@@ -88,6 +78,15 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
     # Create widgets for the configuration
     form = ipywidgets_jsonschema.Form(load_schema())
 
+    # Set a default so that we immediately get a good output
+    form.data = {
+        "grid": {
+            "cells": [512, 512],
+            "extensions": [1.0, 1.0],
+        },
+        "stochastic": {"covariance": "exponential", "variance": 1.0},
+    }
+
     # Output proxy object
     def _creator():
         return RandomField(form.data, comm=comm, partitioning=partitioning, dtype=dtype)
@@ -104,9 +103,20 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
 
     def _realize(_):
         proxy._update_()
-        imagebox.children = [img_as_widget(proxy._repr_png_())]
+        png = proxy._repr_png_()
+        if png is None:
+            imagebox.children = [
+                ipywidgets.Label("This dimension cannot be visualized interactively.")
+            ]
+        else:
+            imagebox.children = [
+                ipywidgets.Image(value=proxy._repr_png_(), format="png")
+            ]
 
     realize.on_click(_realize)
+
+    # Start with a visualization
+    realize.click()
 
     # Arrange the widgets into a grid layout
     app = ipywidgets.AppLayout(

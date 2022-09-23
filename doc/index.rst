@@ -3,4 +3,7 @@
    :caption: Contents:
 
    intro
+   sequential
+   parallel
+   interactive
    api
