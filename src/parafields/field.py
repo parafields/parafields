@@ -40,6 +40,7 @@ def generate_field(
     covariance="exponential",
     variance=1.0,
     corrLength=[0.05],
+    periodic=False,
     embedding_factor=2,
     embedding_type="classical",
     sigmoid_function="smoothstep",
@@ -211,6 +212,7 @@ def generate_field(
             "cacheInvMatvec": cacheInvMatvec,
             "cacheInvRootMatvec": cacheInvRootMatvec,
             "cg_iterations": cg_iterations,
+            "periodic": periodic,
         },
     }
 
@@ -352,4 +354,7 @@ class RandomField:
             return
 
         # Convert to PIL array
-        return Image.fromarray(np.uint8(cm.gist_earth(eval_) * 255))
+        img = Image.fromarray(np.uint8(cm.gist_earth(eval_) * 255))
+
+        # Ask PIL for the correct PNG repr
+        return img._repr_png_()

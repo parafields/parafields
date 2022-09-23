@@ -22,6 +22,7 @@ The following options are supported in the backend but not yet in the Python bin
 * axiparallel and full geometric anisotropy
 * value transforms like log-normal, folded normal, or
   sign function (excursion set)
+* Coarsening and refinement of random fields for multigrid/-scale methods
 
 ## Installation
 

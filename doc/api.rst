@@ -7,3 +7,5 @@ This is the complete reference of the Python API for the :code:`parafields` pack
 
 .. autoclass:: parafields.field.RandomField
     :members:
+
+.. autofunction:: parafields.interactive_generate_field
