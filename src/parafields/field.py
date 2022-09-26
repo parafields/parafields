@@ -53,6 +53,7 @@ def generate_field(
     cauchy_alpha=1.0,
     cauchy_beta=1.0,
     exp_gamma=1.0,
+    transform=None,
     dtype=np.float64,
     seed=0,
     partitioning=None,
@@ -158,6 +159,20 @@ def generate_field(
         The gamma value for gammaExponential covariance
     :type exp_gamma: float
 
+    :param transform:
+        A transformation that should be applied to the raw gaussian random
+        field after evaluation. This can either be a Python callable accepting
+        and returning an array of values or a string to select one of these
+        pre-defined transformations:
+
+        * `lognormal`: Applies the exponential to the field, thereby
+          producing a log-normal random field.
+        * `foldednormal`: Applied the absolute value to the field, thereby
+          producting folded normal fields.
+        * `sign`: Applies the sign function to the field, thereby producing
+          binary fields that can e.g. be used to generate random subdomains.
+    :type transform: str or Callable
+
     :param dtype:
         The floating point type to use. If the matching C++ type has not been
         compiled into the backend, an error is thrown.
@@ -218,7 +233,12 @@ def generate_field(
 
     # Return the Python class representing the field
     return RandomField(
-        config, dtype=dtype, partitioning=partitioning, comm=comm, seed=seed
+        config,
+        transform=transform,
+        dtype=dtype,
+        partitioning=partitioning,
+        comm=comm,
+        seed=seed,
     )
 
 
@@ -230,16 +250,43 @@ available_types = {
     dt: t for dt, t in possible_types.items() if _parafields.has_precision(t)
 }
 
+# The mapping of built-in transformations
+transformation_mapping = {
+    "lognormal": np.exp,
+    "foldednormal": np.abs,
+    "sign": np.sign,
+}
+
 
 class RandomField:
     def __init__(
-        self, config, dtype=np.float64, partitioning=None, comm=None, seed=None
+        self,
+        config,
+        transform=None,
+        dtype=np.float64,
+        partitioning=None,
+        comm=None,
+        seed=None,
     ):
         """Create a random field from a ready backend configuration
 
         :param config:
             A nested dictionary containing a valid backend configuration.
         :type config: dict
+
+        :param transform:
+            A transformation that should be applied to the raw gaussian random
+            field after evaluation. This can either be a Python callable accepting
+            and returning an array of values or a string to select one of these
+            pre-defined transformations:
+
+            * `lognormal`: Applies the exponential to the field, thereby
+            producing a log-normal random field.
+            * `foldednormal`: Applied the absolute value to the field, thereby
+            producting folded normal fields.
+            * `sign`: Applies the sign function to the field, thereby producing
+            binary fields that can e.g. be used to generate random subdomains.
+        :type transform: str or Callable
 
         :param dtype:
             The floating point type to use. If the matching C++ type has not been
@@ -268,6 +315,7 @@ class RandomField:
         # Validate the given config
         self.config = validate_config(config)
         self.seed = None
+        self.transform = transform
 
         # Ensure that the given dtype is supported by parafields
         if dtype not in possible_types:
@@ -341,6 +389,16 @@ class RandomField:
         # Lazily evaluate the entire field
         if self._eval is None:
             self._eval = self._field.eval()
+
+            # Apply transformation
+            if self.transform is not None:
+                # Look up transformation strings
+                transform = self.transform
+                if isinstance(transform, str):
+                    transform = transformation_mapping[transform]
+
+                self._eval = transform(self._eval)
+
         return self._eval
 
     def _repr_png_(self):
