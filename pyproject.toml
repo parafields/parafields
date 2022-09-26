@@ -4,7 +4,6 @@
 [build-system]
 requires = [
     "setuptools>=61,<64",
-    "setuptools_scm >=7",
     "wheel",
     "scikit-build",
     "cmake>=3.15",
@@ -19,7 +18,7 @@ build-backend = "setuptools.build_meta"
 # single source of truth for parafieldsseq's version
 [project]
 name = "parafields"
-dynamic = ["version"]
+version = "0.1.0"
 description = "Parallel Parameter Fields for Uncertainty Quantification"
 readme = "README.md"
 maintainers = [
@@ -66,14 +65,6 @@ tests = [
 # NB: Setuptools-specific build options are currently still stored
 #     in setup.py, as scikit-build is not (yet) supporting PEP621.
 #     Later on, these will be stored in [tool.setuptools]
-
-# Configure setuptools_scm, which extracts the version number from
-# the version control system. For more information see its documentation:
-# https://github.com/pypa/setuptools_scm
-[tool.setuptools_scm]
-version_scheme = "post-release"
-local_scheme = "node-and-date"
-write_to = "src/parafields/_version.py"
 
 # The following is the configuration for the pytest test suite
 [tool.pytest.ini_options]
