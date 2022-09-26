@@ -63,3 +63,17 @@ def test_seed_is_none():
     arr2 = field.evaluate()
 
     assert not np.allclose(arr1, arr2)
+
+
+def test_sign_transform():
+    field = generate_field(transform="sign")
+    arr = field.evaluate()
+    assert np.unique(arr).shape[0] == 2
+
+
+def test_custom_transform():
+    def trafo(a):
+        return a + 1
+
+    field = generate_field(transform=trafo)
+    field.evaluate()
