@@ -90,7 +90,7 @@ jobs:
 
       - name: Run test suite
         run:
-          mpirun --oversubscribe -np 4 python -m pytest --with-mpi
+          mpirun --oversubscribe -np 4 python -m pytest --only-mpi
 
   upload_pypi:
     needs: [build-sdist, build-wheels, test-sdist]

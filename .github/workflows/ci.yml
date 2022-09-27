@@ -58,14 +58,13 @@ jobs:
           CMAKE_ARGS: "-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
 
       - name: Run sequential test suite
-        if: matrix.parallel == 'OFF'
         run: |
-          python -m pytest
+          python -m pytest --nbval
 
       - name: Run parallel test suite
         if: matrix.parallel == 'ON'
         run: |
-          mpirun --oversubscribe -np 4 python -m pytest --nbval --only-mpi
+          mpirun --oversubscribe -np 4 python -m pytest --only-mpi
 
   coverage:
     name: Coverage Testing
