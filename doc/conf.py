@@ -6,7 +6,6 @@
 
 import os
 import parafields
-import subprocess
 import sys
 
 # -- Path setup --------------------------------------------------------------

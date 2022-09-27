@@ -16,7 +16,7 @@ except ImportError:
     HAVE_JUPYYER_EXTRA = False
 
 
-def return_proxy(creator, widgets):
+def return_proxy(creator):
     """A transparent proxy that can be returned from Jupyter UIs
 
     The created proxy object solves the general problem of needing to non-blockingly
@@ -34,6 +34,9 @@ def return_proxy(creator, widgets):
     """
 
     class ObjectProxy(wrapt.ObjectProxy):
+        def _update_(self):
+            self.__wrapped__ = creator()
+
         def __copy__(self):
             return ObjectProxy(copy.copy(self.__wrapped__))
 
@@ -43,27 +46,7 @@ def return_proxy(creator, widgets):
     # Create a new proxy object by calling the creator once
     proxy = ObjectProxy(creator())
 
-    # Define a handler that updates the proxy
-    def _update_proxy(_):
-        proxy.__wrapped__ = creator()
-
-    # Register handler that triggers proxy update
-    for widget in widgets:
-        widget.observe(
-            _update_proxy, names=("value", "selected_index", "data"), type="change"
-        )
-
     return proxy
-
-
-def img_as_widget(img):
-    """Create an image widget from a PIL.Image"""
-
-    # Create and fill in-memory stream
-    membuf = io.BytesIO()
-    img.save(membuf, format="png")
-
-    return ipywidgets.Image(value=membuf.getvalue(), format="png")
 
 
 def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
@@ -95,13 +78,24 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
     # Create widgets for the configuration
     form = ipywidgets_jsonschema.Form(load_schema())
 
+    # Set a default so that we immediately get a good output
+    form.data = {
+        "grid": {
+            "cells": [512, 512],
+            "extensions": [1.0, 1.0],
+        },
+        "stochastic": {
+            "covariance": "exponential",
+            "variance": 1.0,
+            "corrLength": 0.05,
+        },
+    }
+
     # Output proxy object
-    proxy = return_proxy(
-        lambda: RandomField(
-            form.data, comm=comm, partitioning=partitioning, dtype=dtype
-        ),
-        [form],
-    )
+    def _creator():
+        return RandomField(form.data, comm=comm, partitioning=partitioning, dtype=dtype)
+
+    proxy = return_proxy(_creator)
 
     # Image widget for output
     imagebox = ipywidgets.Box()
@@ -112,9 +106,21 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
     )
 
     def _realize(_):
-        imagebox.children = [img_as_widget(proxy._repr_png_())]
+        proxy._update_()
+        png = proxy._repr_png_()
+        if png is None:
+            imagebox.children = [
+                ipywidgets.Label("This dimension cannot be visualized interactively.")
+            ]
+        else:
+            imagebox.children = [
+                ipywidgets.Image(value=proxy._repr_png_(), format="png")
+            ]
 
     realize.on_click(_realize)
+
+    # Start with a visualization
+    realize.click()
 
     # Arrange the widgets into a grid layout
     app = ipywidgets.AppLayout(

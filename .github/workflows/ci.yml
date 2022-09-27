@@ -62,11 +62,55 @@ jobs:
         env:
           CMAKE_ARGS: "--debug-output -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
 
-      - name: Run test suite
+      - name: Run sequential test suite
+        if: matrix.parallel == 'OFF'
         run: |
           python -m pytest
 
       - name: Run parallel test suite
         if: matrix.parallel == 'ON'
         run: |
-          mpirun --oversubscribe -np 4 python -m pytest --only-mpi
+          mpirun --oversubscribe -np 4 python -m pytest --nbval --only-mpi
+
+  coverage:
+    name: Coverage Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checking out the repository
+        uses: actions/checkout@v3
+
+      - name: Installing system dependencies
+        run: |
+          sudo apt update
+          sudo apt install libopenmpi-dev lcov
+
+      - name: Install parallel Python package
+        run: |
+          python -m pip install -v -e .[tests,jupyter]
+        env:
+          CMAKE_ARGS: -DCMAKE_CXX_FLAGS=--coverage
+
+      - name: Run test suite
+        working-directory: ./test
+        run: |
+          python -m pytest --cov --cov-report=xml --with-mpi
+
+      - name: Collect C++ coverage report
+        run: |
+          lcov --directory _skbuild --capture --output-file coverage.info
+          lcov_cobertura coverage.info -o coverage2.xml
+
+      - name: Upload C++ coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          files: ./coverage2.xml
+          verbose: true
+
+      - name: Upload Python coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          files: ./test/coverage.xml
+          verbose: true

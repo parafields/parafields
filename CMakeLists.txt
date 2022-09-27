@@ -6,6 +6,9 @@ project(
   VERSION 0.1
   LANGUAGES C CXX)
 
+# We allow <Package>_ROOT (env) variables for locating dependencies
+cmake_policy(SET CMP0074 NEW)
+
 # Define user-facing options
 option(FORCE_SEQUENTIAL "Force a sequential build" OFF)
 option(BUILD_SINGLE_PRECISION "Enable building single precision support" OFF)
