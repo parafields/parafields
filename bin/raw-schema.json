@@ -266,6 +266,74 @@
     "stochastic": {
       "else": {
         "else": {
+          "else": {
+            "else": {
+              "else": {
+                "if": {
+                  "properties": {
+                    "anisotropy": {
+                      "const": "geometric"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "corrLength": {
+                      "description": "Geometric correlation length of random field (rowwise)",
+                      "items": {
+                        "exclusiveMinimum": 0.0,
+                        "type": "number"
+                      },
+                      "maxItems": 9,
+                      "minItems": 1,
+                      "title": "Rowwise geometric correlation length",
+                      "type": "array"
+                    }
+                  }
+                }
+              },
+              "if": {
+                "properties": {
+                  "anisotropy": {
+                    "const": "axiparallel"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "corrLength": {
+                    "description": "Axiparallel correlation length of random field",
+                    "items": {
+                      "exclusiveMinimum": 0.0,
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 1,
+                    "title": "Axiparallel Correlation length",
+                    "type": "array"
+                  }
+                }
+              }
+            },
+            "if": {
+              "properties": {
+                "anisotropy": {
+                  "const": "none"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "corrLength": {
+                  "default": 0.05,
+                  "description": "Isotropic Correlation length of random field",
+                  "exclusiveMinimum": 0.0,
+                  "title": "Isotropic Correlation length",
+                  "type": "number"
+                }
+              }
+            }
+          },
           "if": {
             "properties": {
               "covariance": {
@@ -333,20 +401,6 @@
           ],
           "title": "Anisotropy",
           "type": "string"
-        },
-        "corrLength": {
-          "default": [
-            0.05
-          ],
-          "description": "Correlation length of random field",
-          "items": {
-            "exclusiveMinimum": 0.0,
-            "type": "number"
-          },
-          "maxItems": 1,
-          "minItems": 1,
-          "title": "Correlation length",
-          "type": "array"
         },
         "covariance": {
           "default": "exponential",

@@ -39,7 +39,8 @@ def generate_field(
     extensions=(1.0, 1.0),
     covariance="exponential",
     variance=1.0,
-    corrLength=[0.05],
+    anisotropy="none",
+    corrLength=0.05,
     periodic=False,
     embedding_factor=2,
     embedding_type="classical",
@@ -95,9 +96,19 @@ def generate_field(
         The variance of the random field.
     :type variance: float
 
+    :param anisotropy:
+        The type of anisotropy for the field. Can be one of the following:
+
+        * `none` for an isotropic field
+        * `axiparallel`
+        * `geometric`
+
+    :type anisotropy: str
+
     :param corrLength:
         The correlation length of the field. This can either be a scalar for
-        an isotropic field or a list of length dimension for an anisotropic one.
+        an isotropic field or a list of length dimension for an anisotropic one
+        or a row-wise dim x dim matrix for a geometric one.
     :type corrLength: float
 
     :param periodic:
@@ -208,6 +219,7 @@ def generate_field(
     config = {
         "grid": {"cells": list(cells), "extensions": list(extensions)},
         "stochastic": {
+            "anisotropy": anisotropy,
             "corrLength": corrLength,
             "covariance": covariance,
             "variance": variance,

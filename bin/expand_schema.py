@@ -5,6 +5,7 @@
 # approach avoid code duplication within the schema file.
 
 import copy
+import itertools
 import json
 import os
 
@@ -28,6 +29,40 @@ for i in range(3):
     dims[i]["properties"]["grid"]["properties"]["extensions"]["default"] = [
         dims[i]["properties"]["grid"]["properties"]["extensions"]["default"][0]
     ] * (i + 1)
+
+    # Create sizes and defaults for axiparallel correlation length
+    dims[i]["properties"]["stochastic"]["else"]["else"]["else"]["else"]["then"][
+        "properties"
+    ]["corrLength"]["minItems"] = (i + 1)
+    dims[i]["properties"]["stochastic"]["else"]["else"]["else"]["else"]["then"][
+        "properties"
+    ]["corrLength"]["maxItems"] = (i + 1)
+    axicorr = [0.05]
+    for j in range(i):
+        axicorr.append(axicorr[-1] * 2)
+    dims[i]["properties"]["stochastic"]["else"]["else"]["else"]["else"]["then"][
+        "properties"
+    ]["corrLength"]["default"] = axicorr
+
+    # Create sizes and defaults for geometric correlation length
+    dims[i]["properties"]["stochastic"]["else"]["else"]["else"]["else"]["else"]["then"][
+        "properties"
+    ]["corrLength"]["minItems"] = (i + 1) * (i + 1)
+    dims[i]["properties"]["stochastic"]["else"]["else"]["else"]["else"]["else"]["then"][
+        "properties"
+    ]["corrLength"]["maxItems"] = (i + 1) * (i + 1)
+    geocorr = []
+    for j, k in itertools.product(range(i + 1), range(i + 1)):
+        if j == k:
+            geocorr.append(0.05)
+        else:
+            geocorr.append(0.0)
+    dims[i]["properties"]["stochastic"]["else"]["else"]["else"]["else"]["else"]["then"][
+        "properties"
+    ]["corrLength"]["default"] = geocorr
+    del dims[i]["properties"]["stochastic"]["else"]["else"]["else"]["else"]["else"][
+        "then"
+    ]["properties"]["corrLength"]["items"]["exclusiveMinimum"]
 
 dims[0]["properties"]["fftw"]["properties"]["transposed"]["default"] = False
 dims[2]["properties"]["stochastic"]["properties"]["covariance"]["enum"].remove("cubic")
