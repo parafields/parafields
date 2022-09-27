@@ -84,7 +84,11 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
             "cells": [512, 512],
             "extensions": [1.0, 1.0],
         },
-        "stochastic": {"covariance": "exponential", "variance": 1.0},
+        "stochastic": {
+            "covariance": "exponential",
+            "variance": 1.0,
+            "corrLength": 0.05,
+        },
     }
 
     # Output proxy object
