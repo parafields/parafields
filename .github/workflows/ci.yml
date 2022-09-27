@@ -59,11 +59,12 @@ jobs:
 
       - name: Run sequential test suite
         run: |
-          python -m pytest --nbval
+          python -m pytest
 
       - name: Run parallel test suite
         if: matrix.parallel == 'ON'
         run: |
+          python -m pytest --nbval
           mpirun --oversubscribe -np 4 python -m pytest --only-mpi
 
   coverage:
