@@ -65,7 +65,7 @@ jobs:
       - name: Install MPI
         run: |
           sudo apt update
-          sudo apt install libopenmpi-dev libfftw3-dev libfftw3-mpi-dev
+          sudo apt install libopenmpi-dev
 
       - name: Install FFTW
         if: matrix.fftw == 'system'
