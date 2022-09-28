@@ -64,7 +64,7 @@ jobs:
       - name: Run parallel test suite
         if: matrix.parallel == 'ON'
         run: |
-          python -m pytest --nbval
+          python -m pytest --nbval --nbval-cell-timeout=20
           mpirun --oversubscribe -np 4 python -m pytest --only-mpi
 
   coverage:
