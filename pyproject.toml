@@ -92,6 +92,3 @@ skip = "pp* *p27-* cp35-* cp36-* cp37-* *musllinux*"
 # Testing commands for our wheels
 test-command = "pytest {package}/test"
 test-requires = ["pytest"]
-
-[tool.cibuildwheel.macos]
-environment = { CMAKE_ARGS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++" }
