@@ -53,7 +53,7 @@ jobs:
           sed -i.bak 's|"mpi4py",||g' pyproject.toml
           python -m pip install -v .[tests,jupyter] || ls D:/a/parafields/parafields/_skbuild/win-amd64-3.9/cmake-build/core-inst
         env:
-          CMAKE_ARGS: "-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DFORCE_SEQUENTIAL=ON"
+          CMAKE_ARGS: "-DFORCE_SEQUENTIAL=ON"
 
       - name: Install parallel Python package
         if: matrix.parallel == 'ON'
