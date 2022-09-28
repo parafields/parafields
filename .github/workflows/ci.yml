@@ -61,10 +61,17 @@ jobs:
         run: |
           python -m pytest
 
+      - name: Run Jupyter notebook tests
+        # We restrict this to the Linux runner to circumvent a stupid
+        # problem in nbval with the MacOS runner being to slow:
+        # https://github.com/computationalmodelling/nbval/issues/151
+        if: matrix.parallel == 'ON' && runner.os == 'Linux'
+        run: |
+          python -m pytest --nbval
+
       - name: Run parallel test suite
         if: matrix.parallel == 'ON'
         run: |
-          python -m pytest --nbval --nbval-cell-timeout=20
           mpirun --oversubscribe -np 4 python -m pytest --only-mpi
 
   coverage:
