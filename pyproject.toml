@@ -18,7 +18,7 @@ build-backend = "setuptools.build_meta"
 # single source of truth for parafieldsseq's version
 [project]
 name = "parafields"
-version = "0.1.0"
+version = "0.1.1"
 description = "Parallel Parameter Fields for Uncertainty Quantification"
 readme = "README.md"
 maintainers = [
@@ -92,6 +92,3 @@ skip = "pp* *p27-* cp35-* cp36-* cp37-* *musllinux*"
 # Testing commands for our wheels
 test-command = "pytest {package}/test"
 test-requires = ["pytest"]
-
-[tool.cibuildwheel.macos]
-environment = { CMAKE_ARGS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++" }
