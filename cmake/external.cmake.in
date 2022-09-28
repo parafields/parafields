@@ -94,7 +94,7 @@ endif()
 
 ExternalProject_add(dune-common
   GIT_REPOSITORY https://github.com/dokempf/dune-common-fallback.git
-  GIT_TAG parafields-compatibility
+  GIT_TAG windows-wheels
   SOURCE_DIR @CMAKE_BINARY_DIR@/dune-common
   INSTALL_DIR @CMAKE_BINARY_DIR@/dune-inst
   UPDATE_COMMAND ""
