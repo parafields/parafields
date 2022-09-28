@@ -18,8 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        #os: [ubuntu-latest, macos-latest, windows-latest]
-        os: [windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.9"]
         parallel: ["ON", "OFF"]
         exclude:
@@ -59,8 +58,6 @@ jobs:
         if: matrix.parallel == 'ON'
         run: |
           python -m pip install -v .[tests,jupyter]
-        env:
-          CMAKE_ARGS: "--debug-output -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
 
       - name: Run sequential test suite
         if: matrix.parallel == 'OFF'

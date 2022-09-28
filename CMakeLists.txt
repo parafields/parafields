@@ -23,9 +23,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Configure and build our external dependencies
 configure_file(cmake/external.cmake.in external/CMakeLists.txt @ONLY)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external)
-execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Release
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external)
 
 # Find the parafields library

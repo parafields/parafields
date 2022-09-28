@@ -23,8 +23,6 @@ if(( NOT MPI_FOUND ) OR (@FORCE_SEQUENTIAL@))
     USES_TERMINAL_DOWNLOAD 1
     USES_TERMINAL_CONFIGURE 1
     USES_TERMINAL_BUILD 1
-    BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release
-    INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
     CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fakempi-inst
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -93,8 +91,8 @@ if ( NOT ( FFTW_FLOAT_LIB_FOUND AND FFTW_FLOAT_MPI_LIB_FOUND AND FFTW_DOUBLE_LIB
 endif()
 
 ExternalProject_add(dune-common
-  GIT_REPOSITORY https://github.com/dokempf/dune-common-fallback.git
-  GIT_TAG windows-wheels
+  GIT_REPOSITORY https://github.com/parafields/dune-common-fallback.git
+  GIT_TAG main
   SOURCE_DIR @CMAKE_BINARY_DIR@/dune-common
   INSTALL_DIR @CMAKE_BINARY_DIR@/dune-inst
   UPDATE_COMMAND ""
@@ -112,7 +110,7 @@ ExternalProject_add(dune-common
 
 ExternalProject_add(parafields-core
   GIT_REPOSITORY https://github.com/parafields/parafields-core.git
-  GIT_TAG portable-pi
+  GIT_TAG main
   SOURCE_DIR @CMAKE_BINARY_DIR@/parafields-core
   INSTALL_DIR @CMAKE_BINARY_DIR@/parafields-core-inst
   UPDATE_COMMAND ""
