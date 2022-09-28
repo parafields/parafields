@@ -26,13 +26,12 @@ configure_file(cmake/external.cmake.in external/CMakeLists.txt @ONLY)
 execute_process(
   COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external COMMAND_ERROR_IS_FATAL ANY)
-execute_process(
-  COMMAND ${CMAKE_COMMAND} --build .
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external)
 
 # Find the parafields library
 set(CMAKE_PREFIX_PATH
-    ${CMAKE_BINARY_DIR}/core-inst ${CMAKE_BINARY_DIR}/dune-inst
+    ${CMAKE_BINARY_DIR}/parafields-core-inst ${CMAKE_BINARY_DIR}/dune-inst
     ${CMAKE_BINARY_DIR}/fftw3-inst ${CMAKE_BINARY_DIR}/fakempi-inst
     "${CMAKE_PREFIX_PATH}")
 
