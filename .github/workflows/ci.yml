@@ -46,7 +46,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install sequential Python package
-        if: matrix.parallel == 'OFF' && runner.os =='Windows'
+        if: matrix.parallel == 'OFF'
         shell: bash
         run: |
           sed -i.bak 's|"mpi4py",||g' pyproject.toml
