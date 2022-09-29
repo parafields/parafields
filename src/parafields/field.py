@@ -54,7 +54,6 @@ def generate_field(
     cauchy_alpha=1.0,
     cauchy_beta=1.0,
     exp_gamma=1.0,
-    symmetric_covariance=False,
     transform=None,
     dtype=np.float64,
     seed=None,
@@ -95,8 +94,7 @@ def generate_field(
         Alternatively, you can pass a callable (e.g. a function or a class instance
         that defines __call__) to the covariance function. This allows you to use
         covariance functions defined in Python, but results in a significant performance
-        penalty. If your covariance function is symmetric, you can set symmetric_covariance
-        to True to save some memory.
+        penalty. This is currently limited to symmetric covariance functions.
     :type covariance: str or Callable
 
     :param variance:
@@ -176,11 +174,6 @@ def generate_field(
         The gamma value for gammaExponential covariance
     :type exp_gamma: float
 
-    :param symmetric_covariance:
-        Whether a given custom covariance function is symmetric or not. Setting
-        this to true allows saving some memory in the backend.
-    :type symmetric_covariance: bool
-
     :param transform:
         A transformation that should be applied to the raw gaussian random
         field after evaluation. This can either be a Python callable accepting
@@ -229,10 +222,7 @@ def generate_field(
     cov_func = None
     if isinstance(covariance, collections.abc.Callable):
         cov_func = covariance
-        if symmetric_covariance:
-            covariance = "custom-iso"
-        else:
-            covariance = "custom-aniso"
+        covariance = "custom-iso"
 
     # Create the backend configuration
     backend_config = {
