@@ -54,9 +54,10 @@ def generate_field(
     cauchy_alpha=1.0,
     cauchy_beta=1.0,
     exp_gamma=1.0,
+    symmetric_covariance=False,
     transform=None,
     dtype=np.float64,
-    seed=0,
+    seed=None,
     partitioning=None,
     comm=None,
 ):
@@ -90,7 +91,13 @@ def generate_field(
         * `cubic`
         * `dampedOscillation`
         * `whiteNoise`
-    :type covariance: str
+
+        Alternatively, you can pass a callable (e.g. a function or a class instance
+        that defines __call__) to the covariance function. This allows you to use
+        covariance functions defined in Python, but results in a significant performance
+        penalty. If your covariance function is symmetric, you can set symmetric_covariance
+        to True to save some memory.
+    :type covariance: str or Callable
 
     :param variance:
         The variance of the random field.
@@ -102,7 +109,6 @@ def generate_field(
         * `none` for an isotropic field
         * `axiparallel`
         * `geometric`
-
     :type anisotropy: str
 
     :param corrLength:
@@ -170,6 +176,11 @@ def generate_field(
         The gamma value for gammaExponential covariance
     :type exp_gamma: float
 
+    :param symmetric_covariance:
+        Whether a given custom covariance function is symmetric or not. Setting
+        this to true allows saving some memory in the backend.
+    :type symmetric_covariance: bool
+
     :param transform:
         A transformation that should be applied to the raw gaussian random
         field after evaluation. This can either be a Python callable accepting
@@ -215,8 +226,16 @@ def generate_field(
     if fftw_transpose is None:
         fftw_transpose = len(cells) > 1
 
+    cov_func = None
+    if isinstance(covariance, collections.abc.Callable):
+        cov_func = covariance
+        if symmetric_covariance:
+            covariance = "custom-iso"
+        else:
+            covariance = "custom-aniso"
+
     # Create the backend configuration
-    config = {
+    backend_config = {
         "grid": {"cells": list(cells), "extensions": list(extensions)},
         "stochastic": {
             "anisotropy": anisotropy,
@@ -243,15 +262,20 @@ def generate_field(
         },
     }
 
+    frontend_config = {
+        "transform": transform,
+        "dtype": dtype,
+        "partitioning": partitioning,
+        "comm": comm,
+        "covariance_function": cov_func,
+    }
+
     # Return the Python class representing the field
-    return RandomField(
-        config,
-        transform=transform,
-        dtype=dtype,
-        partitioning=partitioning,
-        comm=comm,
-        seed=seed,
-    )
+    field = RandomField(backend_config, **frontend_config)
+
+    field.generate(seed=seed)
+
+    return field
 
 
 # A mapping of numpy types to C++ type names
@@ -278,7 +302,7 @@ class RandomField:
         dtype=np.float64,
         partitioning=None,
         comm=None,
-        seed=None,
+        covariance_function=None,
     ):
         """Create a random field from a ready backend configuration
 
@@ -316,18 +340,13 @@ class RandomField:
             Alternatively, a function can be provided that accepts the number of
             processors and the cell sizes as arguments.
         :type partitioning: list
-
-        :param seed:
-            The seed for the random number generator. This can either be an integer
-            to reproduce a field for the given seed or `None` which would generate
-            a new seed.
-        :type seed: int
         """
 
         # Validate the given config
         self.config = validate_config(config)
         self.seed = None
         self.transform = transform
+        self.covariance_function = covariance_function
 
         # Ensure that the given dtype is supported by parafields
         if dtype not in possible_types:
@@ -362,8 +381,8 @@ class RandomField:
                 dict_to_parameter_tree(self.config), list(partitioning), comm
             )
 
-        # Trigger the generation process
-        self.generate(seed=seed)
+        # Marker whether the field has been generated
+        self._generated = False
 
         # Storage for lazy evaluation
         self._eval = None
@@ -377,6 +396,15 @@ class RandomField:
         :type seed: int
         """
 
+        # Maybe calculate covariance
+        if self.covariance_function is not None:
+            if self.config["stochastic"]["covariance"] not in (
+                "custom-aniso",
+                "custom-iso",
+            ):
+                raise ValueError("Conflicting definition of covariance in backend!")
+            self._field.compute_covariance(self.covariance_function)
+
         # Maybe create a new seed
         if seed is None:
             seed = time.time_ns() % (2**32)
@@ -388,6 +416,7 @@ class RandomField:
 
             # Trigger field generation in the backend
             self._field.generate(seed)
+            self._generated = True
 
     def evaluate(self):
         """Evaluate the random field
@@ -400,6 +429,10 @@ class RandomField:
 
         # Lazily evaluate the entire field
         if self._eval is None:
+            # Maybe trigger generation
+            if not self._generated:
+                self.generate()
+
             self._eval = self._field.eval()
 
             # Apply transformation

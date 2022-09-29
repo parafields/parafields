@@ -1,3 +1,4 @@
+#include <pybind11/functional.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -12,6 +13,7 @@
 #include <dune/common/fvector.hh>
 
 #include <array>
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -46,6 +48,13 @@ namespace parafields {
   }));                                                                         \
                                                                                \
   ADD_MPI_CONSTRUCTOR(dim, t);                                                 \
+                                                                               \
+  field##dim##d_##t.def(                                                       \
+    "compute_covariance",                                                      \
+    [](RandomField##dim##D_##t& self,                                          \
+       std::function<t(const t, const std::array<t, dim>&)> func) {            \
+      self.fillMatrix(func);                                                   \
+    });                                                                        \
                                                                                \
   field##dim##d_##t.def("generate",                                            \
                         [](RandomField##dim##D_##t& self, unsigned int seed) { \

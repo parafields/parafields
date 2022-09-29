@@ -77,3 +77,16 @@ def test_custom_transform():
 
     field = generate_field(transform=trafo)
     field.evaluate()
+
+
+def test_custom_covariance():
+    def whitenoise(v, x):
+        for i in x:
+            if np.abs(i) > 1e-10:
+                return 0.0
+        return v
+
+    field1 = generate_field(covariance="whiteNoise", seed=0)
+    field2 = generate_field(covariance=whitenoise, seed=0)
+
+    assert np.allclose(field1.evaluate(), field2.evaluate())
