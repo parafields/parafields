@@ -77,3 +77,11 @@ def test_custom_transform():
 
     field = generate_field(transform=trafo)
     field.evaluate()
+
+
+def test_custom_rng():
+    gen = np.random.default_rng()
+    rng = lambda: gen.random()
+
+    field = generate_field(rng=rng)
+    field.evaluate()

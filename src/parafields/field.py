@@ -59,6 +59,7 @@ def generate_field(
     seed=0,
     partitioning=None,
     comm=None,
+    rng=None,
 ):
     """Main entry point for generating parafields parameter fields
 
@@ -244,7 +245,7 @@ def generate_field(
     }
 
     # Return the Python class representing the field
-    return RandomField(
+    field = RandomField(
         config,
         transform=transform,
         dtype=dtype,
@@ -252,6 +253,10 @@ def generate_field(
         comm=comm,
         seed=seed,
     )
+
+    field.generate(seed=seed, rng=rng)
+
+    return field
 
 
 # A mapping of numpy types to C++ type names
@@ -368,7 +373,7 @@ class RandomField:
         # Storage for lazy evaluation
         self._eval = None
 
-    def generate(self, seed=None):
+    def generate(self, seed=None, rng=None):
         """Regenerate the field with the given seed
 
         :param seed:
@@ -376,6 +381,12 @@ class RandomField:
             on every call.
         :type seed: int
         """
+
+        # If an RNG was given, we regenerate with it!
+        if rng is not None:
+            self._eval = None
+            self._field.generate_with_rng(0, rng)
+            return
 
         # Maybe create a new seed
         if seed is None:

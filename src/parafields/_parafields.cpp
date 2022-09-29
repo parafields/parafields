@@ -1,3 +1,4 @@
+#include <pybind11/functional.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -18,6 +19,13 @@
 namespace py = pybind11;
 
 namespace parafields {
+
+template<typename T>
+struct CustomRNG
+{
+  std::function<T()> rng;
+  T sample() { return rng(); }
+};
 
 #if !MPI_IS_FAKEMPI
 #define ADD_MPI_CONSTRUCTOR(dim, t)                                            \
@@ -50,6 +58,14 @@ namespace parafields {
   field##dim##d_##t.def("generate",                                            \
                         [](RandomField##dim##D_##t& self, unsigned int seed) { \
                           self.generate(seed, true);                           \
+                        });                                                    \
+                                                                               \
+  field##dim##d_##t.def("generate_with_rng",                                   \
+                        [](RandomField##dim##D_##t& self,                      \
+                           unsigned int seed,                                  \
+                           std::function<t()> rng) {                           \
+                          self.generateWithRNG(                                \
+                            CustomRNG<t>{ rng }, seed, true);                  \
                         });                                                    \
                                                                                \
   field##dim##d_##t.def(                                                       \
