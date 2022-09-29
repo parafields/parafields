@@ -1,0 +1,125 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(parafields-external LANGUAGES C)
+
+include(ExternalProject)
+
+# Determine whether we have MPI or not
+find_package(MPI)
+
+# Determine whether we have FFTW
+set(CMAKE_MODULE_PATH @PROJECT_SOURCE_DIR@/cmake ${CMAKE_MODULE_PATH})
+find_package(FFTW COMPONENTS DOUBLE_LIB DOUBLE_MPI_LIB FLOAT_LIB FLOAT_MPI_LIB)
+
+set(FAKEMPI_DEP)
+set(FAKEMPI_CMAKE_ARG)
+if(( NOT MPI_FOUND ) OR (@FORCE_SEQUENTIAL@))
+  ExternalProject_add(fakempi
+    GIT_REPOSITORY https://github.com/ssciwr/FakeMPI.git
+    GIT_TAG main
+    SOURCE_DIR @CMAKE_BINARY_DIR@/fakempi
+    INSTALL_DIR @CMAKE_BINARY_DIR@/fakempi-inst
+    USES_TERMINAL_DOWNLOAD 1
+    USES_TERMINAL_CONFIGURE 1
+    USES_TERMINAL_BUILD 1
+    CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fakempi-inst
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      -DCMAKE_INSTALL_LIBDIR=lib
+  )
+  set(FAKEMPI_DEP fakempi)
+  set(FAKEMPI_CMAKE_ARG
+    -DCMAKE_PREFIX_PATH=@CMAKE_BINARY_DIR@/fakempi-inst
+    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+  )
+endif()
+
+set(FFTW_DEP)
+set(FFTW_DOUBLE_DEP)
+set(FFTW_PATH)
+if ( NOT ( FFTW_FLOAT_LIB_FOUND AND FFTW_FLOAT_MPI_LIB_FOUND AND FFTW_DOUBLE_LIB_FOUND AND FFTW_DOUBLE_MPI_LIB_FOUND) )
+  if(@BUILD_SINGLE_PRECISION@)
+    ExternalProject_add(fftw3-float
+      URL http://www.fftw.org/fftw-3.3.10.tar.gz
+      URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
+      SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3-float
+      PATCH_COMMAND ${CMAKE_COMMAND} -E copy @PROJECT_SOURCE_DIR@/cmake/fftw3-toplevel.cmake @CMAKE_BINARY_DIR@/fftw3-float/CMakeLists.txt
+      INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
+      USES_TERMINAL_DOWNLOAD 1
+      USES_TERMINAL_CONFIGURE 1
+      USES_TERMINAL_BUILD 1
+      CMAKE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        -DENABLE_MPI=ON
+        -DENABLE_FLOAT=ON
+        -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fftw3-inst
+        ${FAKEMPI_CMAKE_ARG}
+      DEPENDS ${FAKEMPI_DEP}
+    )
+    set(FFTW_DEP fftw3-float)
+  endif()
+
+  if(@BUILD_DOUBLE_PRECISION@)
+    ExternalProject_add(fftw3-double
+      URL http://www.fftw.org/fftw-3.3.10.tar.gz
+      URL_HASH MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
+      SOURCE_DIR @CMAKE_BINARY_DIR@/fftw3-double
+      PATCH_COMMAND ${CMAKE_COMMAND} -E copy @PROJECT_SOURCE_DIR@/cmake/fftw3-toplevel.cmake @CMAKE_BINARY_DIR@/fftw3-double/CMakeLists.txt
+      INSTALL_DIR @CMAKE_BINARY_DIR@/fftw3-inst
+      USES_TERMINAL_DOWNLOAD 1
+      USES_TERMINAL_CONFIGURE 1
+      USES_TERMINAL_BUILD 1
+      CMAKE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        -DENABLE_MPI=ON
+        -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/fftw3-inst
+        ${FAKEMPI_CMAKE_ARG}
+      DEPENDS ${FAKEMPI_DEP}
+    )
+    set(FFTW_DEP fftw3-double ${FFTW_DEP})
+  endif()
+
+  set(FFTW_PATH -DFFTW_ROOT=@CMAKE_BINARY_DIR@/fftw3-inst)
+endif()
+
+ExternalProject_add(dune-common
+  GIT_REPOSITORY https://github.com/parafields/dune-common-fallback.git
+  GIT_TAG main
+  SOURCE_DIR @CMAKE_BINARY_DIR@/dune-common
+  INSTALL_DIR @CMAKE_BINARY_DIR@/dune-inst
+  UPDATE_COMMAND ""
+  USES_TERMINAL_DOWNLOAD 1
+  USES_TERMINAL_CONFIGURE 1
+  USES_TERMINAL_BUILD 1
+  CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/dune-inst
+    ${FAKEMPI_CMAKE_ARG}
+    -DCMAKE_DISABLE_FIND_PACKAGE_TBB=ON
+    -DCMAKE_DISABLE_FIND_PACKAGE_Threads=ON
+  DEPENDS ${FAKEMPI_DEP}
+)
+
+ExternalProject_add(parafields-core
+  GIT_REPOSITORY https://github.com/parafields/parafields-core.git
+  GIT_TAG main
+  SOURCE_DIR @CMAKE_BINARY_DIR@/parafields-core
+  INSTALL_DIR @CMAKE_BINARY_DIR@/parafields-core-inst
+  UPDATE_COMMAND ""
+  USES_TERMINAL_DOWNLOAD 1
+  USES_TERMINAL_CONFIGURE 1
+  USES_TERMINAL_BUILD 1
+  CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=Release
+    ${FFTW_PATH}
+    -Ddune-common_ROOT=@CMAKE_BINARY_DIR@/dune-inst
+    -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@/parafields-core-inst
+    ${FAKEMPI_CMAKE_ARG}
+    -DCMAKE_DISABLE_FIND_PACKAGE_HDF5=ON
+    -DCMAKE_DISABLE_FIND_PACKAGE_PNG=ON
+    -DCMAKE_DISABLE_FIND_PACKAGE_Threads=ON
+    -DBUILD_TESTING=OFF
+  DEPENDS dune-common ${FFTW_DEP} ${FAKEMPI_DEP}
+)

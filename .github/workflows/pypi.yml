@@ -13,6 +13,12 @@ jobs:
         include:
           - os: ubuntu-20.04
             arch: "x86_64"
+          - os: macos-12
+            arch: "x86_64"
+          - os: windows-2019
+            arch: "AMD64"
+          - os: windows-2019
+            arch: "x86"
 
     steps:
     - uses: actions/checkout@v3
@@ -33,8 +39,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install MPI
+        run: |
+          sudo apt update
+          sudo apt install libopenmpi-dev
+
       - name: Build SDist
-        run: pipx run build --sdist
+        run: |
+          pipx run build --sdist
 
       - uses: actions/upload-artifact@v3
         with:
@@ -49,7 +61,9 @@ jobs:
       matrix:
         os:
           - ubuntu-20.04
-
+        fftw:
+          - bundled
+          - system
     steps:
       - uses: actions/checkout@v3
 
@@ -57,6 +71,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libopenmpi-dev
+
+      - name: Install FFTW
+        if: matrix.fftw == 'system'
+        run: |
+          sudo apt install libfftw3-dev libfftw3-mpi-dev
 
       - uses: actions/setup-python@v4
         name: Install Python
@@ -72,11 +91,11 @@ jobs:
         shell: bash
         run: |
           python -m pip install dist/*.tar.gz
-          python -m pip install mpi4py pytest
+          python -m pip install pytest pytest-mpi
 
       - name: Run test suite
         run:
-          python -m pytest
+          mpirun --oversubscribe -np 4 python -m pytest --only-mpi
 
   upload_pypi:
     needs: [build-sdist, build-wheels, test-sdist]
