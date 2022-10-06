@@ -424,7 +424,9 @@ class RandomField:
             return
 
         # Convert to PIL array
-        img = Image.fromarray(np.uint8(cm.gist_earth(eval_) * 255))
+        # Transposition is necessary because of conceptional differences between
+        # numpy and pillow: https://stackoverflow.com/a/33727700
+        img = Image.fromarray(np.uint8(cm.gist_earth(eval_.transpose()) * 255))
 
         # Ask PIL for the correct PNG repr
         return img._repr_png_()
