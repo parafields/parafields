@@ -3,6 +3,7 @@ from parafields.utils import *
 import json
 import jsonschema
 import os
+import pytest
 
 
 def test_is_iterable():
@@ -13,8 +14,9 @@ def test_is_iterable():
     assert not is_iterable("abc")
 
 
-def test_load_schema():
-    schema = load_schema()
+@pytest.mark.parametrize("schemafile", ["stochastic.json", "trend.json"])
+def test_load_schema(schemafile):
+    schema = load_schema(schemafile)
     assert isinstance(schema, dict)
 
     # Make sure that the given schema is a valid jsonschema

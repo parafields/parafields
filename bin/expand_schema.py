@@ -1,22 +1,30 @@
 #!/usr/bin/env python
 
-# This script reads the file raw-schema.json and expands it into a
-# more complex schema that applies an anyOf rule per dimension. This
-# approach avoid code duplication within the schema file.
+# This script reads the files raw-*.json and expands them into a
+# more complex schemas that applies an anyOf rule per dimension. This
+# approach avoids code duplication within the schema files.
 
 import copy
 import itertools
 import json
 import os
 
-# Read the raw schema
-with open(os.path.join(os.path.dirname(__file__), "raw-schema.json"), "r") as f:
+# Read the raw schemas
+with open(os.path.join(os.path.dirname(__file__), "raw-stochastic.json"), "r") as f:
     schema = json.load(f)
+
+with open(os.path.join(os.path.dirname(__file__), "raw-trend.json"), "r") as f:
+    trend_schema = json.load(f)
 
 # Add copies per dimension
 dims = [copy.deepcopy(schema), copy.deepcopy(schema), copy.deepcopy(schema)]
+trend_dims = [
+    copy.deepcopy(trend_schema),
+    copy.deepcopy(trend_schema),
+    copy.deepcopy(trend_schema),
+]
 
-# Do the necessary manual adjustments
+# Do the necessary manual adjustments to stochastic schema
 for i in range(3):
     dims[i]["title"] = f"Dimension: {i + 1}"
     dims[i]["properties"]["grid"]["properties"]["cells"]["minItems"] = i + 1
@@ -64,15 +72,77 @@ for i in range(3):
         "then"
     ]["properties"]["corrLength"]["items"]["exclusiveMinimum"]
 
+# Apply some constraints and exceptions
 dims[0]["properties"]["fftw"]["properties"]["transposed"]["default"] = False
 dims[2]["properties"]["stochastic"]["properties"]["covariance"]["enum"].remove("cubic")
 
+# Do the necessary manual adjustments to stochastic schema
+for i in range(3):
+    trend_dims[i]["title"] = f"Dimension: {i + 1}"
+    trend_dims[i]["anyOf"][1]["properties"]["slope"]["properties"]["mean"][
+        "maxItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][1]["properties"]["slope"]["properties"]["mean"][
+        "minItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][1]["properties"]["slope"]["properties"]["variance"][
+        "maxItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][1]["properties"]["slope"]["properties"]["variance"][
+        "minItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][2]["properties"]["disk0"]["properties"]["mean_position"][
+        "maxItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][2]["properties"]["disk0"]["properties"]["mean_position"][
+        "minItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][2]["properties"]["disk0"]["properties"]["variance_position"][
+        "maxItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][2]["properties"]["disk0"]["properties"]["variance_position"][
+        "minItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"]["mean_position"][
+        "maxItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"]["mean_position"][
+        "minItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"]["mean_extent"][
+        "maxItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"]["mean_extent"][
+        "minItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"][
+        "variance_position"
+    ]["maxItems"] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"][
+        "variance_position"
+    ]["minItems"] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"]["variance_extent"][
+        "maxItems"
+    ] = (i + 1)
+    trend_dims[i]["anyOf"][3]["properties"]["block0"]["properties"]["variance_extent"][
+        "minItems"
+    ] = (i + 1)
+
 # Create the expanded schema
 expanded_schema = {"anyOf": [dims[0], dims[1], dims[2]]}
+trend_expanded_schema = {"anyOf": [trend_dims[0], trend_dims[1], trend_dims[2]]}
 
-# And write it to file
+# And write them to file
 with open(
-    os.path.join(os.path.dirname(__file__), "..", "src", "parafields", "schema.json"),
+    os.path.join(
+        os.path.dirname(__file__), "..", "src", "parafields", "stochastic.json"
+    ),
     "w",
 ) as f:
     json.dump(expanded_schema, f)
+
+with open(
+    os.path.join(os.path.dirname(__file__), "..", "src", "parafields", "trend.json"),
+    "w",
+) as f:
+    json.dump(trend_expanded_schema, f)

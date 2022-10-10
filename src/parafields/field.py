@@ -24,11 +24,11 @@ def dict_to_parameter_tree(data, tree=None, prefix=""):
     return tree
 
 
-def validate_config(config):
+def validate_config(config, schema="stochastic.json"):
     """Validate a given configuration against the provided schema"""
 
     # Validate the given config against the schema
-    schema = load_schema()
+    schema = load_schema(schema)
     jsonschema.validate(instance=config, schema=schema)
 
     return config
@@ -367,6 +367,136 @@ class RandomField:
 
         # Storage for lazy evaluation
         self._eval = None
+
+    @property
+    def dimension(self):
+        return len(self.config["grid"]["cells"])
+
+    def _add_trend_component(self, config):
+        # Invalidate cached evaluations
+        self._eval = None
+
+        # Validate the given configuration
+        config = validate_config(config, schema="trend.json")
+
+        # Re-arrange the configuration to fit the backend. This
+        # is because the backend uses a rather unintuitive way of
+        # stacking unrelated parameters.
+        if "disk0" in config:
+            config["disk0"] = {
+                "mean": config["disk0"]["mean_position"]
+                + [config["disk0"]["mean_radius"], config["disk0"]["mean_height"]],
+                "variance": config["disk0"]["variance_position"]
+                + [
+                    config["disk0"]["variance_radius"],
+                    config["disk0"]["variance_height"],
+                ],
+            }
+        if "block0" in config:
+            config["block0"] = {
+                "mean": config["block0"]["mean_position"]
+                + config["block0"]["mean_extent"]
+                + [config["block0"]["mean_height"]],
+                "variance": config["block0"]["variance_position"]
+                + config["block0"]["variance_extent"]
+                + [config["block0"]["variance_height"]],
+            }
+
+        # Add the trend component in the backend
+        self._field.add_trend_component(dict_to_parameter_tree(config))
+
+        # Return self to allow chaining component additions
+        return self
+
+    def add_mean_trend_component(self, mean=1.0, variance=1.0):
+        """Add a mean trend component to the field"""
+
+        return self._add_trend_component({"mean": {"mean": mean, "variance": variance}})
+
+    def add_slope_trend_component(self, mean=None, variance=None):
+        """Add a slope trend component to the field"""
+
+        # Apply field-dependent defaults
+        if mean is None:
+            mean = [1.0] * self.dimension
+
+        if variance is None:
+            variance = [1.0] * self.dimension
+
+        # Add the component
+        return self._add_trend_component(
+            {"slope": {"mean": mean, "variance": variance}}
+        )
+
+    def add_disk_trend_component(
+        self,
+        mean_position=None,
+        variance_position=None,
+        mean_radius=0.05,
+        variance_radius=0.01,
+        mean_height=0.5,
+        variance_height=0.1,
+    ):
+        """Add a disk trend component to the field"""
+
+        # Apply field-dependent defaults
+        if mean_position is None:
+            mean_position = [0.5] * self.dimension
+
+        if variance_position is None:
+            variance_position = [0.1] * self.dimension
+
+        # Add the component
+        return self._add_trend_component(
+            {
+                "disk0": {
+                    "mean_position": mean_position,
+                    "variance_position": variance_position,
+                    "mean_radius": mean_radius,
+                    "variance_radius": variance_radius,
+                    "mean_height": mean_height,
+                    "variance_height": variance_height,
+                }
+            }
+        )
+
+    def add_block_trend_component(
+        self,
+        mean_position=None,
+        variance_position=None,
+        mean_extent=None,
+        variance_extent=None,
+        mean_height=0.5,
+        variance_height=0.1,
+    ):
+        """Add a block trend component to the field"""
+
+        # Apply field-dependent defaults
+        if mean_position is None:
+            mean_position = [0.5] * self.dimension
+
+        if variance_position is None:
+            variance_position = [0.1] * self.dimension
+
+        if mean_extent is None:
+            mean_extent = [0.5] * self.dimension
+
+        if variance_extent is None:
+            variance_extent = [0.1] * self.dimension
+
+        # Add the component
+        return self._add_trend_component(
+            {
+                "block0": {
+                    "mean_position": mean_position,
+                    "variance_position": variance_position,
+                    "mean_extent": mean_extent,
+                    "variance_extent": variance_extent,
+                    "mean_height": mean_height,
+                    "variance_height": variance_height,
+                }
+            }
+        )
 
     def generate(self, seed=None):
         """Regenerate the field with the given seed

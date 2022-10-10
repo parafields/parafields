@@ -77,3 +77,21 @@ def test_custom_transform():
 
     field = generate_field(transform=trafo)
     field.evaluate()
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        "add_mean_trend_component",
+        "add_slope_trend_component",
+        "add_disk_trend_component",
+        "add_block_trend_component",
+    ],
+)
+def test_add_trend_component(method):
+    field = generate_field()
+    eval1 = field.evaluate()
+    getattr(field, method)()
+    eval2 = field.evaluate()
+
+    assert not np.allclose(eval1, eval2)
