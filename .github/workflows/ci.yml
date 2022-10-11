@@ -111,7 +111,6 @@ jobs:
           fail_ci_if_error: true
           files: ./coverage2.xml
           verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload Python coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -119,4 +118,3 @@ jobs:
           fail_ci_if_error: true
           files: ./test/coverage.xml
           verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
