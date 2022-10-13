@@ -550,7 +550,7 @@ class RandomField:
             self._field.compute_covariance(self.covariance_function)
 
         # If an RNG was given, we regenerate with it!
-        if rng is not None:
+        if isinstance(rng, collections.abc.Callable):
             self._eval = None
             self._field.generate_with_rng(0, rng)
             return
