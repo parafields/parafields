@@ -104,7 +104,7 @@ ExternalProject_add(dune-common
 
 ExternalProject_add(parafields-core
   GIT_REPOSITORY https://github.com/parafields/parafields-core.git
-  GIT_TAG custom-covariance
+  GIT_TAG main
   SOURCE_DIR @CMAKE_BINARY_DIR@/parafields-core
   INSTALL_DIR @CMAKE_BINARY_DIR@/parafields-core-inst
   UPDATE_COMMAND ""

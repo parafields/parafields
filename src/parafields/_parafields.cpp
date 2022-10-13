@@ -56,6 +56,16 @@ namespace parafields {
       self.fillMatrix(func);                                                   \
     });                                                                        \
                                                                                \
+  field##dim##d_##t.def(                                                       \
+    "add_trend_component",                                                     \
+    [](RandomField##dim##D_##t& self, Dune::ParameterTree tree) {              \
+      self.add_trend_components(tree);                                         \
+    });                                                                        \
+                                                                               \
+  field##dim##d_##t.def(                                                       \
+    "remove_trend_component",                                                  \
+    [](RandomField##dim##D_##t& self) { self.remove_trend_components(1); });   \
+                                                                               \
   field##dim##d_##t.def("generate",                                            \
                         [](RandomField##dim##D_##t& self, unsigned int seed) { \
                           self.generate(seed, true);                           \

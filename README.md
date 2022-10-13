@@ -28,7 +28,7 @@ The following options are supported in the backend but not yet in the Python bin
 
 This is a minimal usage example of the `parafields` package:
 
-![Minimum usage example](parafields.gif)
+![Minimum usage example](https://raw.githubusercontent.com/parafields/parafields/main/parafields.gif)
 
 For more examples, check out the [parafields documentation](https://parafields.readthedocs.io/).
 
