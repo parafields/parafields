@@ -424,7 +424,9 @@
                 "generalizedCauchy",
                 "cubic",
                 "dampedOscillation",
-                "whiteNoise"
+                "whiteNoise",
+                "custom-iso",
+                "custom-aniso"
               ],
               "title": "Covariance structure",
               "type": "string"
@@ -893,7 +895,9 @@
                 "generalizedCauchy",
                 "cubic",
                 "dampedOscillation",
-                "whiteNoise"
+                "whiteNoise",
+                "custom-iso",
+                "custom-aniso"
               ],
               "title": "Covariance structure",
               "type": "string"
@@ -1369,7 +1373,9 @@
                 "cauchy",
                 "generalizedCauchy",
                 "dampedOscillation",
-                "whiteNoise"
+                "whiteNoise",
+                "custom-iso",
+                "custom-aniso"
               ],
               "title": "Covariance structure",
               "type": "string"

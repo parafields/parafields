@@ -79,6 +79,29 @@ def test_custom_transform():
     field.evaluate()
 
 
+def whitenoise(v, x):
+    for i in x:
+        if np.abs(i) > 1e-10:
+            return 0.0
+    return v
+
+
+def exponential(v, x):
+    return v * np.exp(-np.linalg.norm(x))
+
+
+@pytest.mark.parametrize(
+    "builtin,custom",
+    [("whiteNoise", whitenoise), ("exponential", exponential)],
+    ids=["whitenoise", "exponential"],
+)
+def test_custom_covariance(builtin, custom):
+    field1 = generate_field(covariance=builtin, seed=0)
+    field2 = generate_field(covariance=custom, seed=0)
+
+    assert np.allclose(field1.evaluate(), field2.evaluate())
+
+
 @pytest.mark.parametrize(
     "method",
     [
