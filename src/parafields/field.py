@@ -24,11 +24,11 @@ def dict_to_parameter_tree(data, tree=None, prefix=""):
     return tree
 
 
-def validate_config(config):
+def validate_config(config, schema="stochastic.json"):
     """Validate a given configuration against the provided schema"""
 
     # Validate the given config against the schema
-    schema = load_schema()
+    schema = load_schema(schema)
     jsonschema.validate(instance=config, schema=schema)
 
     return config
@@ -56,7 +56,7 @@ def generate_field(
     exp_gamma=1.0,
     transform=None,
     dtype=np.float64,
-    seed=0,
+    seed=None,
     partitioning=None,
     comm=None,
     rng=None,
@@ -91,7 +91,12 @@ def generate_field(
         * `cubic`
         * `dampedOscillation`
         * `whiteNoise`
-    :type covariance: str
+
+        Alternatively, you can pass a callable (e.g. a function or a class instance
+        that defines __call__) to the covariance function. This allows you to use
+        covariance functions defined in Python, but results in a significant performance
+        penalty. This is currently limited to symmetric covariance functions.
+    :type covariance: str or Callable
 
     :param variance:
         The variance of the random field.
@@ -216,8 +221,13 @@ def generate_field(
     if fftw_transpose is None:
         fftw_transpose = len(cells) > 1
 
+    cov_func = None
+    if isinstance(covariance, collections.abc.Callable):
+        cov_func = covariance
+        covariance = "custom-iso"
+
     # Create the backend configuration
-    config = {
+    backend_config = {
         "grid": {"cells": list(cells), "extensions": list(extensions)},
         "stochastic": {
             "anisotropy": anisotropy,
@@ -244,15 +254,16 @@ def generate_field(
         },
     }
 
+    frontend_config = {
+        "transform": transform,
+        "dtype": dtype,
+        "partitioning": partitioning,
+        "comm": comm,
+        "covariance_function": cov_func,
+    }
+
     # Return the Python class representing the field
-    field = RandomField(
-        config,
-        transform=transform,
-        dtype=dtype,
-        partitioning=partitioning,
-        comm=comm,
-        seed=seed,
-    )
+    field = RandomField(backend_config, **frontend_config)
 
     field.generate(seed=seed, rng=rng)
 
@@ -283,7 +294,7 @@ class RandomField:
         dtype=np.float64,
         partitioning=None,
         comm=None,
-        seed=None,
+        covariance_function=None,
     ):
         """Create a random field from a ready backend configuration
 
@@ -321,18 +332,13 @@ class RandomField:
             Alternatively, a function can be provided that accepts the number of
             processors and the cell sizes as arguments.
         :type partitioning: list
-
-        :param seed:
-            The seed for the random number generator. This can either be an integer
-            to reproduce a field for the given seed or `None` which would generate
-            a new seed.
-        :type seed: int
         """
 
         # Validate the given config
         self.config = validate_config(config)
         self.seed = None
         self.transform = transform
+        self.covariance_function = covariance_function
 
         # Ensure that the given dtype is supported by parafields
         if dtype not in possible_types:
@@ -367,11 +373,141 @@ class RandomField:
                 dict_to_parameter_tree(self.config), list(partitioning), comm
             )
 
-        # Trigger the generation process
-        self.generate(seed=seed)
+        # Marker whether the field has been generated
+        self._generated = False
 
         # Storage for lazy evaluation
         self._eval = None
+
+    @property
+    def dimension(self):
+        return len(self.config["grid"]["cells"])
+
+    def _add_trend_component(self, config):
+        # Invalidate cached evaluations
+        self._eval = None
+
+        # Validate the given configuration
+        config = validate_config(config, schema="trend.json")
+
+        # Re-arrange the configuration to fit the backend. This
+        # is because the backend uses a rather unintuitive way of
+        # stacking unrelated parameters.
+        if "disk0" in config:
+            config["disk0"] = {
+                "mean": config["disk0"]["mean_position"]
+                + [config["disk0"]["mean_radius"], config["disk0"]["mean_height"]],
+                "variance": config["disk0"]["variance_position"]
+                + [
+                    config["disk0"]["variance_radius"],
+                    config["disk0"]["variance_height"],
+                ],
+            }
+        if "block0" in config:
+            config["block0"] = {
+                "mean": config["block0"]["mean_position"]
+                + config["block0"]["mean_extent"]
+                + [config["block0"]["mean_height"]],
+                "variance": config["block0"]["variance_position"]
+                + config["block0"]["variance_extent"]
+                + [config["block0"]["variance_height"]],
+            }
+
+        # Add the trend component in the backend
+        self._field.add_trend_component(dict_to_parameter_tree(config))
+
+        # Return self to allow chaining component additions
+        return self
+
+    def add_mean_trend_component(self, mean=1.0, variance=1.0):
+        """Add a mean trend component to the field"""
+
+        return self._add_trend_component({"mean": {"mean": mean, "variance": variance}})
+
+    def add_slope_trend_component(self, mean=None, variance=None):
+        """Add a slope trend component to the field"""
+
+        # Apply field-dependent defaults
+        if mean is None:
+            mean = [1.0] * self.dimension
+
+        if variance is None:
+            variance = [1.0] * self.dimension
+
+        # Add the component
+        return self._add_trend_component(
+            {"slope": {"mean": mean, "variance": variance}}
+        )
+
+    def add_disk_trend_component(
+        self,
+        mean_position=None,
+        variance_position=None,
+        mean_radius=0.05,
+        variance_radius=0.01,
+        mean_height=0.5,
+        variance_height=0.1,
+    ):
+        """Add a disk trend component to the field"""
+
+        # Apply field-dependent defaults
+        if mean_position is None:
+            mean_position = [0.5] * self.dimension
+
+        if variance_position is None:
+            variance_position = [0.1] * self.dimension
+
+        # Add the component
+        return self._add_trend_component(
+            {
+                "disk0": {
+                    "mean_position": mean_position,
+                    "variance_position": variance_position,
+                    "mean_radius": mean_radius,
+                    "variance_radius": variance_radius,
+                    "mean_height": mean_height,
+                    "variance_height": variance_height,
+                }
+            }
+        )
+
+    def add_block_trend_component(
+        self,
+        mean_position=None,
+        variance_position=None,
+        mean_extent=None,
+        variance_extent=None,
+        mean_height=0.5,
+        variance_height=0.1,
+    ):
+        """Add a block trend component to the field"""
+
+        # Apply field-dependent defaults
+        if mean_position is None:
+            mean_position = [0.5] * self.dimension
+
+        if variance_position is None:
+            variance_position = [0.1] * self.dimension
+
+        if mean_extent is None:
+            mean_extent = [0.5] * self.dimension
+
+        if variance_extent is None:
+            variance_extent = [0.1] * self.dimension
+
+        # Add the component
+        return self._add_trend_component(
+            {
+                "block0": {
+                    "mean_position": mean_position,
+                    "variance_position": variance_position,
+                    "mean_extent": mean_extent,
+                    "variance_extent": variance_extent,
+                    "mean_height": mean_height,
+                    "variance_height": variance_height,
+                }
+            }
+        )
 
     def generate(self, seed=None, rng=None):
         """Regenerate the field with the given seed
@@ -381,6 +517,15 @@ class RandomField:
             on every call.
         :type seed: int
         """
+
+        # Maybe calculate covariance
+        if self.covariance_function is not None:
+            if self.config["stochastic"]["covariance"] not in (
+                "custom-aniso",
+                "custom-iso",
+            ):
+                raise ValueError("Conflicting definition of covariance in backend!")
+            self._field.compute_covariance(self.covariance_function)
 
         # If an RNG was given, we regenerate with it!
         if rng is not None:
@@ -399,6 +544,7 @@ class RandomField:
 
             # Trigger field generation in the backend
             self._field.generate(seed)
+            self._generated = True
 
     def evaluate(self):
         """Evaluate the random field
@@ -411,6 +557,10 @@ class RandomField:
 
         # Lazily evaluate the entire field
         if self._eval is None:
+            # Maybe trigger generation
+            if not self._generated:
+                self.generate()
+
             self._eval = self._field.eval()
 
             # Apply transformation
@@ -435,7 +585,9 @@ class RandomField:
             return
 
         # Convert to PIL array
-        img = Image.fromarray(np.uint8(cm.gist_earth(eval_) * 255))
+        # Transposition is necessary because of conceptional differences between
+        # numpy and pillow: https://stackoverflow.com/a/33727700
+        img = Image.fromarray(np.uint8(cm.gist_earth(eval_.transpose()) * 255))
 
         # Ask PIL for the correct PNG repr
         return img._repr_png_()

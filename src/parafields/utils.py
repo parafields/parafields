@@ -10,8 +10,8 @@ def is_iterable(x):
     return isinstance(x, collections.abc.Iterable)
 
 
-def load_schema():
+def load_schema(filename):
     # Load the schema file shipped with parafields
-    schema_file = os.path.join(os.path.dirname(__file__), "schema.json")
+    schema_file = os.path.join(os.path.dirname(__file__), filename)
     with open(schema_file, "r") as f:
         return json.load(f)

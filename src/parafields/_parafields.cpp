@@ -13,6 +13,7 @@
 #include <dune/common/fvector.hh>
 
 #include <array>
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -55,6 +56,23 @@ struct CustomRNG
                                                                                \
   ADD_MPI_CONSTRUCTOR(dim, t);                                                 \
                                                                                \
+  field##dim##d_##t.def(                                                       \
+    "compute_covariance",                                                      \
+    [](RandomField##dim##D_##t& self,                                          \
+       std::function<t(const t, const std::array<t, dim>&)> func) {            \
+      self.fillMatrix(func);                                                   \
+    });                                                                        \
+                                                                               \
+  field##dim##d_##t.def(                                                       \
+    "add_trend_component",                                                     \
+    [](RandomField##dim##D_##t& self, Dune::ParameterTree tree) {              \
+      self.add_trend_components(tree);                                         \
+    });                                                                        \
+                                                                               \
+  field##dim##d_##t.def(                                                       \
+    "remove_trend_component",                                                  \
+    [](RandomField##dim##D_##t& self) { self.remove_trend_components(1); });   \
+                                                                               \
   field##dim##d_##t.def("generate",                                            \
                         [](RandomField##dim##D_##t& self, unsigned int seed) { \
                           self.generate(seed, true);                           \
@@ -64,8 +82,9 @@ struct CustomRNG
                         [](RandomField##dim##D_##t& self,                      \
                            unsigned int seed,                                  \
                            std::function<t()> rng) {                           \
+                          CustomRNG<t> wrapped{ rng };                         \
                           self.generateWithRNG(                                \
-                            CustomRNG<t>{ rng }, seed, true);                  \
+                            wrapped, true);                                    \
                         });                                                    \
                                                                                \
   field##dim##d_##t.def(                                                       \

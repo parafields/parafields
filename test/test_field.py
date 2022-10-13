@@ -79,6 +79,47 @@ def test_custom_transform():
     field.evaluate()
 
 
+def whitenoise(v, x):
+    for i in x:
+        if np.abs(i) > 1e-10:
+            return 0.0
+    return v
+
+
+def exponential(v, x):
+    return v * np.exp(-np.linalg.norm(x))
+
+
+@pytest.mark.parametrize(
+    "builtin,custom",
+    [("whiteNoise", whitenoise), ("exponential", exponential)],
+    ids=["whitenoise", "exponential"],
+)
+def test_custom_covariance(builtin, custom):
+    field1 = generate_field(covariance=builtin, seed=0)
+    field2 = generate_field(covariance=custom, seed=0)
+
+    assert np.allclose(field1.evaluate(), field2.evaluate())
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        "add_mean_trend_component",
+        "add_slope_trend_component",
+        "add_disk_trend_component",
+        "add_block_trend_component",
+    ],
+)
+def test_add_trend_component(method):
+    field = generate_field()
+    eval1 = field.evaluate()
+    getattr(field, method)()
+    eval2 = field.evaluate()
+
+    assert not np.allclose(eval1, eval2)
+
+
 def test_custom_rng():
     gen = np.random.default_rng()
     rng = lambda: gen.random()
