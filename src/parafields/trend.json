@@ -1,0 +1,523 @@
+{
+  "anyOf": [
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "mean": {
+              "properties": {
+                "mean": {
+                  "default": 1.0,
+                  "title": "Trend Mean",
+                  "type": "number"
+                },
+                "variance": {
+                  "default": 1.0,
+                  "title": "Trend Variance",
+                  "type": "number"
+                }
+              },
+              "title": "Mean configuration",
+              "type": "object"
+            }
+          },
+          "title": "Mean Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "slope": {
+              "properties": {
+                "mean": {
+                  "items": {
+                    "default": 1.0,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Trend Mean (per dim)",
+                  "type": "array"
+                },
+                "variance": {
+                  "items": {
+                    "default": 1.0,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Trend Variance (per dim)",
+                  "type": "array"
+                }
+              },
+              "title": "Slope Configuration",
+              "type": "object"
+            }
+          },
+          "title": "Slope Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "disk0": {
+              "properties": {
+                "mean_height": {
+                  "default": 0.5,
+                  "title": "Mean of Height",
+                  "type": "number"
+                },
+                "mean_position": {
+                  "items": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Mean of Position",
+                  "type": "array"
+                },
+                "mean_radius": {
+                  "default": 0.05,
+                  "title": "Mean of Radius",
+                  "type": "number"
+                },
+                "variance_height": {
+                  "default": 0.05,
+                  "title": "Variance of Height",
+                  "type": "number"
+                },
+                "variance_position": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Variance of Position",
+                  "type": "array"
+                },
+                "variance_radius": {
+                  "default": 0.01,
+                  "title": "Variance of Radius",
+                  "type": "number"
+                }
+              },
+              "title": "Disk configuration",
+              "type": "object"
+            }
+          },
+          "title": "Disk Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "block0": {
+              "properties": {
+                "mean_extent": {
+                  "items": {
+                    "default": 0.1,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Mean of Block extent",
+                  "type": "array"
+                },
+                "mean_height": {
+                  "default": 2.5,
+                  "title": "Mean of Height",
+                  "type": "number"
+                },
+                "mean_position": {
+                  "items": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Mean of Center Position",
+                  "type": "array"
+                },
+                "variance_extent": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Variance of Block extent",
+                  "type": "array"
+                },
+                "variance_height": {
+                  "default": 0.1,
+                  "title": "Variance of Height",
+                  "type": "number"
+                },
+                "variance_position": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "title": "Variance of Center Position",
+                  "type": "array"
+                }
+              },
+              "title": "Block configuration",
+              "type": "object"
+            }
+          },
+          "title": "Block Trend Component",
+          "type": "object"
+        }
+      ],
+      "title": "Dimension: 1"
+    },
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "mean": {
+              "properties": {
+                "mean": {
+                  "default": 1.0,
+                  "title": "Trend Mean",
+                  "type": "number"
+                },
+                "variance": {
+                  "default": 1.0,
+                  "title": "Trend Variance",
+                  "type": "number"
+                }
+              },
+              "title": "Mean configuration",
+              "type": "object"
+            }
+          },
+          "title": "Mean Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "slope": {
+              "properties": {
+                "mean": {
+                  "items": {
+                    "default": 1.0,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Trend Mean (per dim)",
+                  "type": "array"
+                },
+                "variance": {
+                  "items": {
+                    "default": 1.0,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Trend Variance (per dim)",
+                  "type": "array"
+                }
+              },
+              "title": "Slope Configuration",
+              "type": "object"
+            }
+          },
+          "title": "Slope Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "disk0": {
+              "properties": {
+                "mean_height": {
+                  "default": 0.5,
+                  "title": "Mean of Height",
+                  "type": "number"
+                },
+                "mean_position": {
+                  "items": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Mean of Position",
+                  "type": "array"
+                },
+                "mean_radius": {
+                  "default": 0.05,
+                  "title": "Mean of Radius",
+                  "type": "number"
+                },
+                "variance_height": {
+                  "default": 0.05,
+                  "title": "Variance of Height",
+                  "type": "number"
+                },
+                "variance_position": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Variance of Position",
+                  "type": "array"
+                },
+                "variance_radius": {
+                  "default": 0.01,
+                  "title": "Variance of Radius",
+                  "type": "number"
+                }
+              },
+              "title": "Disk configuration",
+              "type": "object"
+            }
+          },
+          "title": "Disk Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "block0": {
+              "properties": {
+                "mean_extent": {
+                  "items": {
+                    "default": 0.1,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Mean of Block extent",
+                  "type": "array"
+                },
+                "mean_height": {
+                  "default": 2.5,
+                  "title": "Mean of Height",
+                  "type": "number"
+                },
+                "mean_position": {
+                  "items": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Mean of Center Position",
+                  "type": "array"
+                },
+                "variance_extent": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Variance of Block extent",
+                  "type": "array"
+                },
+                "variance_height": {
+                  "default": 0.1,
+                  "title": "Variance of Height",
+                  "type": "number"
+                },
+                "variance_position": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "title": "Variance of Center Position",
+                  "type": "array"
+                }
+              },
+              "title": "Block configuration",
+              "type": "object"
+            }
+          },
+          "title": "Block Trend Component",
+          "type": "object"
+        }
+      ],
+      "title": "Dimension: 2"
+    },
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "mean": {
+              "properties": {
+                "mean": {
+                  "default": 1.0,
+                  "title": "Trend Mean",
+                  "type": "number"
+                },
+                "variance": {
+                  "default": 1.0,
+                  "title": "Trend Variance",
+                  "type": "number"
+                }
+              },
+              "title": "Mean configuration",
+              "type": "object"
+            }
+          },
+          "title": "Mean Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "slope": {
+              "properties": {
+                "mean": {
+                  "items": {
+                    "default": 1.0,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Trend Mean (per dim)",
+                  "type": "array"
+                },
+                "variance": {
+                  "items": {
+                    "default": 1.0,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Trend Variance (per dim)",
+                  "type": "array"
+                }
+              },
+              "title": "Slope Configuration",
+              "type": "object"
+            }
+          },
+          "title": "Slope Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "disk0": {
+              "properties": {
+                "mean_height": {
+                  "default": 0.5,
+                  "title": "Mean of Height",
+                  "type": "number"
+                },
+                "mean_position": {
+                  "items": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Mean of Position",
+                  "type": "array"
+                },
+                "mean_radius": {
+                  "default": 0.05,
+                  "title": "Mean of Radius",
+                  "type": "number"
+                },
+                "variance_height": {
+                  "default": 0.05,
+                  "title": "Variance of Height",
+                  "type": "number"
+                },
+                "variance_position": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Variance of Position",
+                  "type": "array"
+                },
+                "variance_radius": {
+                  "default": 0.01,
+                  "title": "Variance of Radius",
+                  "type": "number"
+                }
+              },
+              "title": "Disk configuration",
+              "type": "object"
+            }
+          },
+          "title": "Disk Trend Component",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "block0": {
+              "properties": {
+                "mean_extent": {
+                  "items": {
+                    "default": 0.1,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Mean of Block extent",
+                  "type": "array"
+                },
+                "mean_height": {
+                  "default": 2.5,
+                  "title": "Mean of Height",
+                  "type": "number"
+                },
+                "mean_position": {
+                  "items": {
+                    "default": 0.5,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Mean of Center Position",
+                  "type": "array"
+                },
+                "variance_extent": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Variance of Block extent",
+                  "type": "array"
+                },
+                "variance_height": {
+                  "default": 0.1,
+                  "title": "Variance of Height",
+                  "type": "number"
+                },
+                "variance_position": {
+                  "items": {
+                    "default": 0.01,
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "title": "Variance of Center Position",
+                  "type": "array"
+                }
+              },
+              "title": "Block configuration",
+              "type": "object"
+            }
+          },
+          "title": "Block Trend Component",
+          "type": "object"
+        }
+      ],
+      "title": "Dimension: 3"
+    }
+  ]
+}

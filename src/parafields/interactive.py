@@ -76,7 +76,7 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
         return
 
     # Create widgets for the configuration
-    form = ipywidgets_jsonschema.Form(load_schema())
+    form = ipywidgets_jsonschema.Form(load_schema("stochastic.json"))
 
     # Set a default so that we immediately get a good output
     form.data = {
@@ -94,6 +94,72 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
     # Output proxy object
     def _creator():
         return RandomField(form.data, comm=comm, partitioning=partitioning, dtype=dtype)
+
+    proxy = return_proxy(_creator)
+
+    # Image widget for output
+    imagebox = ipywidgets.Box()
+
+    # Add a button that displays a realization of the field
+    realize = ipywidgets.Button(
+        description="Show realization", layout=ipywidgets.Layout(width="100%")
+    )
+
+    def _realize(_):
+        proxy._update_()
+        png = proxy._repr_png_()
+        if png is None:
+            imagebox.children = [
+                ipywidgets.Label("This dimension cannot be visualized interactively.")
+            ]
+        else:
+            imagebox.children = [
+                ipywidgets.Image(value=proxy._repr_png_(), format="png")
+            ]
+
+    realize.on_click(_realize)
+
+    # Start with a visualization
+    realize.click()
+
+    # Arrange the widgets into a grid layout
+    app = ipywidgets.AppLayout(
+        left_sidebar=form.widget,
+        center=ipywidgets.VBox([realize, imagebox]),
+        pane_widths=(1, 2, 0),
+    )
+
+    # Show the app as a side effect
+    display(app)
+
+    return proxy
+
+
+def interactive_add_trend_component(field):
+    # Return early if we do not have the extra
+    if not HAVE_JUPYYER_EXTRA:
+        print("Please re-run pip installation with 'parafields[jupyter]'")
+        return
+
+    # Create widgets for the configuration
+    full_schema = load_schema("trend.json")
+    dimschema = full_schema["anyOf"][field.dimension - 1]
+    form = ipywidgets_jsonschema.Form(dimschema)
+    added_component = False
+
+    # Output proxy object
+    def _creator():
+        nonlocal added_component
+
+        # Maybe remove previously added component
+        if added_component:
+            field._field.remove_trend_component()
+
+        # Add the component
+        field._add_trend_component(form.data)
+        added_component = True
+
+        return field
 
     proxy = return_proxy(_creator)
 
