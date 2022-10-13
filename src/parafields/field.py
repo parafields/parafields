@@ -59,7 +59,8 @@ def generate_field(
     seed=None,
     partitioning=None,
     comm=None,
-    rng=None,
+    rng="twister",
+    distribution_algorithm="boxMuller",
 ):
     """Main entry point for generating parafields parameter fields
 
@@ -190,6 +191,21 @@ def generate_field(
           binary fields that can e.g. be used to generate random subdomains.
     :type transform: str or Callable
 
+    :param rng:
+        The random number generator to use. This can either be a string from
+        the available selection of "twister", "ranlux, "tausworthe" and "gfsr4".
+        Alternatively, it can be a callable that, when called with no arguments
+        returns a new sample. This introduces a significant performance penalty
+        as a C++/Python cross-language function call overhead is required for
+        each drawn sample.
+    :type rng: str or Callable
+
+    :param distribution_algorithm:
+        The algorithm used for RNG. Can be one of "boxMuller" (default),
+        "ratioMethod" or "ziggurat". This parameter is ignored if a custom RNG
+        function is used.
+    :type distribution_algorithm: str
+
     :param dtype:
         The floating point type to use. If the matching C++ type has not been
         compiled into the backend, an error is thrown.
@@ -253,6 +269,12 @@ def generate_field(
             "periodic": periodic,
         },
     }
+
+    # If the rng parameter is a string, we add it to the backend config.
+    if isinstance(rng, str):
+        backend_config["random"] = {}
+        backend_config["random"]["rng"] = rng
+        backend_config["random"]["distribution"] = distribution_algorithm
 
     frontend_config = {
         "transform": transform,

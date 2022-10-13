@@ -234,6 +234,33 @@
       "title": "Grid",
       "type": "object"
     },
+    "random": {
+      "properties": {
+        "distribution": {
+          "default": "boxMuller",
+          "enum": [
+            "boxMuller",
+            "ratioMethod",
+            "ziggurat"
+          ],
+          "title": "Distribution Algorithm",
+          "type": "string"
+        },
+        "rng": {
+          "default": "twister",
+          "enum": [
+            "twister",
+            "ranlux",
+            "tausworthe",
+            "gfsr4"
+          ],
+          "title": "RNG Type",
+          "type": "string"
+        }
+      },
+      "title": "Random Number Generator",
+      "type": "object"
+    },
     "randomField": {
       "properties": {
         "cacheInvMatvec": {
