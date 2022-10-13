@@ -118,3 +118,11 @@ def test_add_trend_component(method):
     eval2 = field.evaluate()
 
     assert not np.allclose(eval1, eval2)
+
+
+def test_custom_rng():
+    gen = np.random.default_rng()
+    rng = lambda: gen.random()
+
+    field = generate_field(rng=rng)
+    field.evaluate()

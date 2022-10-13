@@ -21,6 +21,13 @@ namespace py = pybind11;
 
 namespace parafields {
 
+template<typename T>
+struct CustomRNG
+{
+  std::function<T()> rng;
+  T sample() { return rng(); }
+};
+
 #if !MPI_IS_FAKEMPI
 #define ADD_MPI_CONSTRUCTOR(dim, t)                                            \
   field##dim##d_##t.def(py::init([](Dune::ParameterTree tree,                  \
@@ -69,6 +76,14 @@ namespace parafields {
   field##dim##d_##t.def("generate",                                            \
                         [](RandomField##dim##D_##t& self, unsigned int seed) { \
                           self.generate(seed, true);                           \
+                        });                                                    \
+                                                                               \
+  field##dim##d_##t.def("generate_with_rng",                                   \
+                        [](RandomField##dim##D_##t& self,                      \
+                           unsigned int seed,                                  \
+                           std::function<t()> rng) {                           \
+                          CustomRNG<t> wrapped{ rng };                         \
+                          self.generateWithRNG(wrapped, true);                 \
                         });                                                    \
                                                                                \
   field##dim##d_##t.def(                                                       \

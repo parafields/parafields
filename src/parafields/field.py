@@ -59,6 +59,7 @@ def generate_field(
     seed=None,
     partitioning=None,
     comm=None,
+    rng=None,
 ):
     """Main entry point for generating parafields parameter fields
 
@@ -107,6 +108,7 @@ def generate_field(
         * `none` for an isotropic field
         * `axiparallel`
         * `geometric`
+
     :type anisotropy: str
 
     :param corrLength:
@@ -263,7 +265,7 @@ def generate_field(
     # Return the Python class representing the field
     field = RandomField(backend_config, **frontend_config)
 
-    field.generate(seed=seed)
+    field.generate(seed=seed, rng=rng)
 
     return field
 
@@ -507,7 +509,7 @@ class RandomField:
             }
         )
 
-    def generate(self, seed=None):
+    def generate(self, seed=None, rng=None):
         """Regenerate the field with the given seed
 
         :param seed:
@@ -524,6 +526,12 @@ class RandomField:
             ):
                 raise ValueError("Conflicting definition of covariance in backend!")
             self._field.compute_covariance(self.covariance_function)
+
+        # If an RNG was given, we regenerate with it!
+        if rng is not None:
+            self._eval = None
+            self._field.generate_with_rng(0, rng)
+            return
 
         # Maybe create a new seed
         if seed is None:
