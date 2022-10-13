@@ -107,15 +107,29 @@ def interactive_generate_field(comm=None, partitioning=None, dtype=np.float64):
 
     def _realize(_):
         proxy._update_()
-        png = proxy._repr_png_()
+
+        # Maybe trigger visualization
+        try:
+            png = proxy._repr_png_()
+        except RuntimeError as e:
+            if e.args[0] == "negative eigenvalues in covariance matrix":
+                imagebox.children = [
+                    ipywidgets.Label(
+                        "Negative eigenvalues in covariance matrix. Consider increasing"
+                        " the embedding factor or explicitly allow approximation of results"
+                        " (both in the 'Embedding' tab)."
+                    )
+                ]
+                return
+            else:
+                raise e
+
         if png is None:
             imagebox.children = [
                 ipywidgets.Label("This dimension cannot be visualized interactively.")
             ]
         else:
-            imagebox.children = [
-                ipywidgets.Image(value=proxy._repr_png_(), format="png")
-            ]
+            imagebox.children = [ipywidgets.Image(value=png, format="png")]
 
     realize.on_click(_realize)
 

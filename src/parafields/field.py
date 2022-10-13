@@ -46,7 +46,7 @@ def generate_field(
     embedding_type="classical",
     sigmoid_function="smoothstep",
     threshold=1e-14,
-    approximate=True,
+    approximate=False,
     fftw_transpose=None,
     cacheInvMatvec=True,
     cacheInvRootMatvec=False,

@@ -131,7 +131,7 @@
           },
           "properties": {
             "approximate": {
-              "default": true,
+              "default": false,
               "description": "Whether to accept approximate results or not. Simply sets negative eigenvalues to zero if they occur.",
               "title": "Approximate results",
               "type": "boolean"
@@ -596,7 +596,7 @@
           },
           "properties": {
             "approximate": {
-              "default": true,
+              "default": false,
               "description": "Whether to accept approximate results or not. Simply sets negative eigenvalues to zero if they occur.",
               "title": "Approximate results",
               "type": "boolean"
@@ -1067,7 +1067,7 @@
           },
           "properties": {
             "approximate": {
-              "default": true,
+              "default": false,
               "description": "Whether to accept approximate results or not. Simply sets negative eigenvalues to zero if they occur.",
               "title": "Approximate results",
               "type": "boolean"
