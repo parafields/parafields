@@ -83,8 +83,7 @@ struct CustomRNG
                            unsigned int seed,                                  \
                            std::function<t()> rng) {                           \
                           CustomRNG<t> wrapped{ rng };                         \
-                          self.generateWithRNG(                                \
-                            wrapped, true);                                    \
+                          self.generateWithRNG(wrapped, true);                 \
                         });                                                    \
                                                                                \
   field##dim##d_##t.def(                                                       \
