@@ -134,3 +134,16 @@ def test_custom_rng():
 
     field = generate_field(rng=rng)
     field.evaluate()
+
+
+def test_probe():
+    # Generate field and bulk evaluate it
+    field = generate_field(cells=(128, 128), extensions=(1.0, 1.0))
+    eval_ = field.evaluate()
+
+    # Iterate over all cells and do manual probing
+    for i in range(128):
+        for j in range(128):
+            assert eval_[i, j] == field.probe(
+                np.array([i * (1 / 128) + 1 / 256, j * (1 / 128) + 1 / 256])
+            )
