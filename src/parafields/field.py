@@ -1,5 +1,7 @@
 import collections.abc
+import io
 import jsonschema
+import matplotlib.pyplot as plt
 import numpy as np
 import parafields._parafields as _parafields
 import time
@@ -602,14 +604,29 @@ class RandomField:
         # Evaluate the field
         eval_ = self.evaluate()
 
-        # If this is not 2D, we skip visualization
-        if len(eval_.shape) != 2:
-            return
+        # Implement 1D visualization using matplotlib
+        if len(eval_.shape) == 1:
+            with plt.ioff():
+                xvalues = np.linspace(0, 1, num=eval_.shape[0])
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                ax.plot(xvalues, eval_)
+                buf = io.BytesIO()
+                fig.savefig(buf, format="png")
+                buf.seek(0)
+                img = Image.open(buf)
+                plt.close(fig)
 
-        # Convert to PIL array
-        # Transposition is necessary because of conceptional differences between
-        # numpy and pillow: https://stackoverflow.com/a/33727700
-        img = Image.fromarray(np.uint8(cm.gist_earth(eval_.transpose()) * 255))
+        # Implement 2D visualization using Pillow
+        if len(eval_.shape) == 2:
+            # Convert to PIL array
+            # Transposition is necessary because of conceptional differences between
+            # numpy and pillow: https://stackoverflow.com/a/33727700
+            img = Image.fromarray(np.uint8(cm.gist_earth(eval_.transpose()) * 255))
+
+        # Skip visualization for 3D fields
+        if len(eval_.shape) == 3:
+            return
 
         # Ask PIL for the correct PNG repr
         return img._repr_png_()
