@@ -403,9 +403,21 @@ class RandomField:
         # Storage for lazy evaluation
         self._eval = None
 
+        # Pre-instantiated quantities used in potentially hot loops
+        self._cells = np.array(self.config["grid"]["cells"])
+        self._extensions = np.array(self.config["grid"]["extensions"])
+
     @property
     def dimension(self):
         return len(self.config["grid"]["cells"])
+
+    @property
+    def cells(self):
+        return self._cells
+
+    @property
+    def extensions(self):
+        return self._extensions
 
     def _add_trend_component(self, config):
         # Invalidate cached evaluations
@@ -569,6 +581,21 @@ class RandomField:
             # Trigger field generation in the backend
             self._field.generate(seed)
             self._generated = True
+
+    def probe(self, coordinate, interpolation="none"):
+        """Evaluate the random field at a given coordinate
+
+        :param coordinate:
+            Where to evaluate the field
+        :type coordinate: np.array
+
+        :param interpolation:
+            A string indicating what interpolation method to use.
+            This is currently no-op.
+        :type interpolation: str
+        """
+        indices = np.floor_divide(coordinate, self.extensions / self.cells).astype(int)
+        return self.evaluate()[tuple(indices)]
 
     def evaluate(self):
         """Evaluate the random field
