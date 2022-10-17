@@ -359,7 +359,9 @@ class RandomField:
         """
 
         # Validate the given config
+        self._comm = comm
         self.config = validate_config(config)
+        self.dtype = dtype
         self.seed = None
         self.transform = transform
         self.covariance_function = covariance_function
@@ -379,7 +381,7 @@ class RandomField:
         if MPI is not None:
             # We use COMM_WORLD as the default communicator if running in parallel
             if comm is None:
-                comm = MPI.COMM_WORLD
+                self._comm = MPI.COMM_WORLD
             # If the given partitioning is a function, call it
             if isinstance(partitioning, collections.abc.Callable):
                 partitioning = partitioning(
@@ -418,6 +420,10 @@ class RandomField:
     @property
     def extensions(self):
         return self._extensions
+
+    @property
+    def comm(self):
+        return self._comm
 
     def _add_trend_component(self, config):
         # Invalidate cached evaluations
@@ -594,6 +600,7 @@ class RandomField:
             This is currently no-op.
         :type interpolation: str
         """
+
         indices = np.floor_divide(coordinate, self.extensions / self.cells).astype(int)
         return self.evaluate()[tuple(indices)]
 
@@ -624,6 +631,41 @@ class RandomField:
                 self._eval = transform(self._eval)
 
         return self._eval
+
+    def fenicsx_function(self, space):
+        # Try importing FeniCS and throw a slightly more meaningful error message
+        # if not successful.
+        try:
+            from dolfinx import fem
+            from petsc4py.PETSc import ScalarType
+        except ImportError as e:
+            raise ImportError(
+                f"FeniCS installation (in particular component '{e.name}' not found)"
+            )
+
+        # Check that we are operating with the same dtype
+        if self.dtype != ScalarType:
+            raise TypeError("FeniCSx and parafields operating with different dtypes!")
+
+        # Create a dolfinx function object
+        func = fem.Function(space, dtype=ScalarType)
+
+        def f(x):
+            # Actual implementation. This is a first, non-performant version that can
+            # be improved through vectorization.
+            result = np.empty(shape=(x.shape[1]))
+            for i in range(x.shape[1]):
+                coord = tuple(
+                    min(max(x[j, i], 1e-8), self.extensions[j] - 1e-8)
+                    for j in range(self.dimension)
+                )
+                result[i] = self.probe(coord)
+
+            return result
+
+        func.interpolate(f)
+
+        return func
 
     def _repr_png_(self):
         """Print 2D random fields as images in Jupyter frontends"""

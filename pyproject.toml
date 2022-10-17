@@ -70,6 +70,7 @@ tests = [
 # The following is the configuration for the pytest test suite
 [tool.pytest.ini_options]
 testpaths = ["test", "jupyter"]
+addopts = ["--ignore=jupyter/fenicsx.ipynb"]
 
 # The next section configures building wheels in Continuous Integration
 # The cibuildwheel documentation covers the available options in detail:
