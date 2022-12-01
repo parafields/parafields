@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           sed -i.bak 's|"mpi4py",||g' pyproject.toml
-          python -m pip install -v .[tests,jupyter] || ls D:/a/parafields/parafields/_skbuild/win-amd64-3.9/cmake-build/core-inst
+          python -m pip install -v .[tests,jupyter]
         env:
           CMAKE_ARGS: "-DFORCE_SEQUENTIAL=ON"
 
@@ -88,6 +88,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libopenmpi-dev lcov
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
       - name: Install parallel Python package
         run: |
