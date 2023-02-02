@@ -43,10 +43,10 @@ dependencies = [
 docs = [
     "docutils<0.17",
     "ipykernel",
-    "m2r2",
     "nbsphinx",
     "nbsphinx-link",
     "sphinx",
+    "sphinx_mdinclude",
     "sphinx_rtd_theme",
 ]
 jupyter = [

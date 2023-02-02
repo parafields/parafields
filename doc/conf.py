@@ -29,9 +29,9 @@ release = parafields.__version__
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "m2r2",
     "nbsphinx",
     "nbsphinx_link",
+    "sphinx_mdinclude",
     "sphinx_rtd_theme",
 ]
 
