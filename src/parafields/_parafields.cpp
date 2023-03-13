@@ -8,6 +8,7 @@
 #include <parafields/python/mpi.hh>
 #endif
 #include <parafields/python/traits.hh>
+#include <parafields/exceptions.hh>
 #include <parafields/randomfield.hh>
 
 #include <dune/common/fvector.hh>
@@ -118,6 +119,9 @@ PYBIND11_MODULE(_parafields, m)
     throw std::runtime_error("Could not load mpi4py API.");
   }
 #endif
+
+  // Register custom exception types
+  py::register_exception<parafields::NegativeEigenvalueError>(m, "NegativeEigenvalueError");
 
   // Expose the Dune::ParameterTree class to allow the Python side to
   // easily feed data into the C++ code.
