@@ -134,7 +134,7 @@ def generate_field(
     :param embedding_type:
         Type of embedding. Can be one of "classical", "merge",
         "fold" or "cofold".
-    :type embedding_factor: str
+    :type embedding_type: str
 
     :param sigmoid_function:
         Sigmoid function for merging, resp. smooth max for folding.
