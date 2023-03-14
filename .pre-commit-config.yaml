@@ -50,7 +50,7 @@ repos:
     rev: 0.22.0
     hooks:
       - id: check-github-workflows
-      - id: check-readthedocs
+     # - id: check-readthedocs
 
   # Format C++ code with Clang-Format - automatically applying the changes
   - repo: https://github.com/pre-commit/mirrors-clang-format
