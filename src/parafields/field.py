@@ -481,6 +481,10 @@ class RandomField:
         return self._extensions
 
     @property
+    def embedding_factor(self):
+        return self.config.get("embedding", {}).get("factor", 2)
+
+    @property
     def comm(self):
         return self._comm
 
