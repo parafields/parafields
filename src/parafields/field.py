@@ -7,6 +7,7 @@ import parafields._parafields as _parafields
 import time
 
 from matplotlib import cm
+from parafields.exceptions import NegativeEigenvalueError
 from parafields.mpi import default_partitioning, MPI
 from parafields.utils import is_iterable, load_schema
 from PIL import Image
@@ -44,6 +45,7 @@ def generate_field(
     anisotropy="none",
     corrLength=0.05,
     periodic=False,
+    autotune_embedding_factor=False,
     embedding_factor=2,
     embedding_type="classical",
     sigmoid_function="smoothstep",
@@ -126,6 +128,12 @@ def generate_field(
         controlled per boundary segment and correlation length must be
         small enough.
     :type periodic: bool
+
+    :param autotune_embedding_factor:
+        Whether the embedding_factor should experimentally be determined. If set
+        to True, a field with the given embedding_factor is generated. If the procedure
+        fails it is multiplied by 2 and field generation is repeated. This is repeated
+        up to 5 times until a field could be generated.
 
     :param embedding_factor:
         Relative size of extended domain (per dimension).
@@ -235,6 +243,57 @@ def generate_field(
         A random field instance.
     :rtype: RandomField
     """
+
+    # Implement heuristic autotuning of the embedding factor
+    if autotune_embedding_factor:
+        # Periodicity implies embedding_factor == 1
+        if periodic:
+            raise ValueError(
+                "'periodic' and 'autotune_embedding_factor' are incompatible."
+            )
+
+        # Approximate implies that autotune is useless
+        if approximate:
+            raise ValueError(
+                "'approximate' and 'autotune_embedding_factor' are incompatible"
+            )
+
+        for i in range(5):
+            try:
+                return generate_field(
+                    cells=cells,
+                    extensions=extensions,
+                    covariance=covariance,
+                    variance=variance,
+                    anisotropy=anisotropy,
+                    corrLength=corrLength,
+                    periodic=periodic,
+                    autotune_embedding_factor=False,
+                    embedding_factor=(2**i) * embedding_factor,
+                    embedding_type=embedding_type,
+                    sigmoid_function=sigmoid_function,
+                    threshold=threshold,
+                    approximate=approximate,
+                    fftw_transpose=fftw_transpose,
+                    cacheInvMatvec=cacheInvMatvec,
+                    cacheInvRootMatvec=cacheInvRootMatvec,
+                    cg_iterations=cg_iterations,
+                    cauchy_alpha=cauchy_alpha,
+                    cauchy_beta=cauchy_beta,
+                    exp_gamma=exp_gamma,
+                    transform=transform,
+                    dtype=dtype,
+                    seed=seed,
+                    partitioning=partitioning,
+                    comm=comm,
+                    rng=rng,
+                    distribution_algorithm=distribution_algorithm,
+                )
+            except NegativeEigenvalueError as e:
+                # Only if this is the last iteration we raise the error.
+                # Otherwise, we ignore it in order to allow the next iteration.
+                if i == 4:
+                    raise e
 
     if fftw_transpose is None:
         fftw_transpose = len(cells) > 1
