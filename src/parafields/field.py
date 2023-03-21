@@ -132,8 +132,12 @@ def generate_field(
     :param autotune_embedding_factor:
         Whether the embedding_factor should experimentally be determined. If set
         to True, a field with the given embedding_factor is generated. If the procedure
-        fails it is multiplied by 2 and field generation is repeated. This is repeated
-        up to 5 times until a field could be generated.
+        fails it is multiplied by 2 and field generation is repeated. Once a sufficiently
+        large embedding factor is found, the interval between the last failing and the
+        first successful one is bisected to identify the minimum embedding factor. This
+        costly procedure amortizes once you generate a huge amount of realizations of
+        the field.
+    :type autotune_embedding_factor: bool
 
     :param embedding_factor:
         Relative size of extended domain (per dimension).
@@ -258,42 +262,76 @@ def generate_field(
                 "'approximate' and 'autotune_embedding_factor' are incompatible"
             )
 
-        for i in range(5):
+        def generate_with_new_embedding(factor):
             try:
-                return generate_field(
-                    cells=cells,
-                    extensions=extensions,
-                    covariance=covariance,
-                    variance=variance,
-                    anisotropy=anisotropy,
-                    corrLength=corrLength,
-                    periodic=periodic,
-                    autotune_embedding_factor=False,
-                    embedding_factor=(2**i) * embedding_factor,
-                    embedding_type=embedding_type,
-                    sigmoid_function=sigmoid_function,
-                    threshold=threshold,
-                    approximate=approximate,
-                    fftw_transpose=fftw_transpose,
-                    cacheInvMatvec=cacheInvMatvec,
-                    cacheInvRootMatvec=cacheInvRootMatvec,
-                    cg_iterations=cg_iterations,
-                    cauchy_alpha=cauchy_alpha,
-                    cauchy_beta=cauchy_beta,
-                    exp_gamma=exp_gamma,
-                    transform=transform,
-                    dtype=dtype,
-                    seed=seed,
-                    partitioning=partitioning,
-                    comm=comm,
-                    rng=rng,
-                    distribution_algorithm=distribution_algorithm,
+                return (
+                    generate_field(
+                        cells=cells,
+                        extensions=extensions,
+                        covariance=covariance,
+                        variance=variance,
+                        anisotropy=anisotropy,
+                        corrLength=corrLength,
+                        periodic=periodic,
+                        autotune_embedding_factor=False,
+                        embedding_factor=factor,
+                        embedding_type=embedding_type,
+                        sigmoid_function=sigmoid_function,
+                        threshold=threshold,
+                        approximate=approximate,
+                        fftw_transpose=fftw_transpose,
+                        cacheInvMatvec=cacheInvMatvec,
+                        cacheInvRootMatvec=cacheInvRootMatvec,
+                        cg_iterations=cg_iterations,
+                        cauchy_alpha=cauchy_alpha,
+                        cauchy_beta=cauchy_beta,
+                        exp_gamma=exp_gamma,
+                        transform=transform,
+                        dtype=dtype,
+                        seed=seed,
+                        partitioning=partitioning,
+                        comm=comm,
+                        rng=rng,
+                        distribution_algorithm=distribution_algorithm,
+                    ),
+                    True,
                 )
-            except NegativeEigenvalueError as e:
-                # Only if this is the last iteration we raise the error.
-                # Otherwise, we ignore it in order to allow the next iteration.
-                if i == 4:
-                    raise e
+            except NegativeEigenvalueError:
+                return None, False
+
+        # Increase embedding factor until we exceed a threshold or are able to create the field
+        current_embedding = embedding_factor
+        possible = False
+        while not possible and current_embedding < 2e5:
+            field, possible = generate_with_new_embedding(current_embedding)
+            if not possible:
+                current_embedding *= 2
+
+        # The procedure was not successful
+        if current_embedding > 2e5:
+            raise ValueError(
+                f"No reasonable embedding factor can be found for your parameters. Last value tried: {current_embedding / 2}"
+            )
+
+        # The first one was successful, no bisection needed
+        if current_embedding == embedding_factor:
+            return field
+
+        # Start the bisection procedure
+        right_boundary = current_embedding
+        left_boundary = current_embedding // 2
+        best_field = field
+        while True:
+            middle = (left_boundary + right_boundary) // 2
+            field, possible = generate_with_new_embedding(middle)
+            if possible:
+                right_boundary = middle
+                best_field = field
+            else:
+                left_boundary = middle
+
+            if right_boundary - left_boundary <= 1:
+                return best_field
 
     if fftw_transpose is None:
         fftw_transpose = len(cells) > 1

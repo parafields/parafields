@@ -171,4 +171,4 @@ def test_autotune_embedding_factor():
         autotune_embedding_factor=True,
     )
 
-    assert field.embedding_factor > 2
+    assert field.embedding_factor == 6
