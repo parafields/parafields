@@ -7,11 +7,13 @@ sphinx:
 formats: all
 
 build:
+  os: ubuntu-22.04
   apt_packages:
     - libopenmpi-dev
+  tools:
+    python: "3.10"
 
 python:
-  version: "3.8"
   install:
     - method: pip
       path: .[docs,jupyter]

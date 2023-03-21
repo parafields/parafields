@@ -7,6 +7,7 @@ import parafields._parafields as _parafields
 import time
 
 from matplotlib import cm
+from parafields.exceptions import NegativeEigenvalueError
 from parafields.mpi import default_partitioning, MPI
 from parafields.utils import is_iterable, load_schema
 from PIL import Image
@@ -44,6 +45,7 @@ def generate_field(
     anisotropy="none",
     corrLength=0.05,
     periodic=False,
+    autotune_embedding_factor=False,
     embedding_factor=2,
     embedding_type="classical",
     sigmoid_function="smoothstep",
@@ -126,6 +128,16 @@ def generate_field(
         controlled per boundary segment and correlation length must be
         small enough.
     :type periodic: bool
+
+    :param autotune_embedding_factor:
+        Whether the embedding_factor should experimentally be determined. If set
+        to True, a field with the given embedding_factor is generated. If the procedure
+        fails it is multiplied by 2 and field generation is repeated. Once a sufficiently
+        large embedding factor is found, the interval between the last failing and the
+        first successful one is bisected to identify the minimum embedding factor. This
+        costly procedure amortizes once you generate a huge amount of realizations of
+        the field.
+    :type autotune_embedding_factor: bool
 
     :param embedding_factor:
         Relative size of extended domain (per dimension).
@@ -235,6 +247,91 @@ def generate_field(
         A random field instance.
     :rtype: RandomField
     """
+
+    # Implement heuristic autotuning of the embedding factor
+    if autotune_embedding_factor:
+        # Periodicity implies embedding_factor == 1
+        if periodic:
+            raise ValueError(
+                "'periodic' and 'autotune_embedding_factor' are incompatible."
+            )
+
+        # Approximate implies that autotune is useless
+        if approximate:
+            raise ValueError(
+                "'approximate' and 'autotune_embedding_factor' are incompatible"
+            )
+
+        def generate_with_new_embedding(factor):
+            try:
+                return (
+                    generate_field(
+                        cells=cells,
+                        extensions=extensions,
+                        covariance=covariance,
+                        variance=variance,
+                        anisotropy=anisotropy,
+                        corrLength=corrLength,
+                        periodic=periodic,
+                        autotune_embedding_factor=False,
+                        embedding_factor=factor,
+                        embedding_type=embedding_type,
+                        sigmoid_function=sigmoid_function,
+                        threshold=threshold,
+                        approximate=approximate,
+                        fftw_transpose=fftw_transpose,
+                        cacheInvMatvec=cacheInvMatvec,
+                        cacheInvRootMatvec=cacheInvRootMatvec,
+                        cg_iterations=cg_iterations,
+                        cauchy_alpha=cauchy_alpha,
+                        cauchy_beta=cauchy_beta,
+                        exp_gamma=exp_gamma,
+                        transform=transform,
+                        dtype=dtype,
+                        seed=seed,
+                        partitioning=partitioning,
+                        comm=comm,
+                        rng=rng,
+                        distribution_algorithm=distribution_algorithm,
+                    ),
+                    True,
+                )
+            except NegativeEigenvalueError:
+                return None, False
+
+        # Increase embedding factor until we exceed a threshold or are able to create the field
+        current_embedding = embedding_factor
+        possible = False
+        while not possible and current_embedding < 2e5:
+            field, possible = generate_with_new_embedding(current_embedding)
+            if not possible:
+                current_embedding *= 2
+
+        # The procedure was not successful
+        if current_embedding > 2e5:
+            raise ValueError(
+                f"No reasonable embedding factor can be found for your parameters. Last value tried: {current_embedding / 2}"
+            )
+
+        # The first one was successful, no bisection needed
+        if current_embedding == embedding_factor:
+            return field
+
+        # Start the bisection procedure
+        right_boundary = current_embedding
+        left_boundary = current_embedding // 2
+        best_field = field
+        while True:
+            middle = (left_boundary + right_boundary) // 2
+            field, possible = generate_with_new_embedding(middle)
+            if possible:
+                right_boundary = middle
+                best_field = field
+            else:
+                left_boundary = middle
+
+            if right_boundary - left_boundary <= 1:
+                return best_field
 
     if fftw_transpose is None:
         fftw_transpose = len(cells) > 1
@@ -420,6 +517,10 @@ class RandomField:
     @property
     def extensions(self):
         return self._extensions
+
+    @property
+    def embedding_factor(self):
+        return self.config.get("embedding", {}).get("factor", 2)
 
     @property
     def comm(self):

@@ -1,5 +1,7 @@
 from parafields.field import *
 
+from parafields.exceptions import NegativeEigenvalueError
+
 import numpy as np
 import pytest
 
@@ -147,3 +149,26 @@ def test_probe():
             assert eval_[i, j] == field.probe(
                 np.array([i * (1 / 128) + 1 / 256, j * (1 / 128) + 1 / 256])
             )
+
+
+def test_negative_eigenvalues_throw_correct():
+    with pytest.raises(NegativeEigenvalueError):
+        generate_field(
+            cells=(256, 256),
+            extensions=(1.0, 1.0),
+            covariance="gaussian",
+            corrLength=0.5,
+        )
+
+
+def test_autotune_embedding_factor():
+    # Generate a field that requires increased embedding factor
+    field = generate_field(
+        cells=(256, 256),
+        extensions=(1.0, 1.0),
+        covariance="gaussian",
+        corrLength=0.5,
+        autotune_embedding_factor=True,
+    )
+
+    assert field.embedding_factor == 6
