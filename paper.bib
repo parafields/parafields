@@ -1,0 +1,120 @@
+@article{KLEIN2017161,
+title = {Efficient geostatistical inversion of transient groundwater flow using preconditioned nonlinear conjugate gradients},
+journal = {Advances in Water Resources},
+volume = {102},
+pages = {161-177},
+year = {2017},
+issn = {0309-1708},
+doi = {https://doi.org/10.1016/j.advwatres.2016.12.006},
+url = {https://www.sciencedirect.com/science/article/pii/S0309170816307643},
+author = {Ole Klein and Olaf A. Cirpka and Peter Bastian and Olaf Ippisch},
+keywords = {Inverse modeling, Geostatistical inversion, Uncertainty quantification, Nonlinear conjugate gradients, Preconditioning},
+abstract = {In the geostatistical inverse problem of subsurface hydrology, continuous hydraulic parameter fields, in most cases hydraulic conductivity, are estimated from measurements of dependent variables, such as hydraulic heads, under the assumption that the parameter fields are autocorrelated random space functions. Upon discretization, the continuous fields become large parameter vectors with O(104−107) elements. While cokriging-like inversion methods have been shown to be efficient for highly resolved parameter fields when the number of measurements is small, they require the calculation of the sensitivity of each measurement with respect to all parameters, which may become prohibitive with large sets of measured data such as those arising from transient groundwater flow. We present a Preconditioned Conjugate Gradient method for the geostatistical inverse problem, in which a single adjoint equation needs to be solved to obtain the gradient of the objective function. Using the autocovariance matrix of the parameters as preconditioning matrix, expensive multiplications with its inverse can be avoided, and the number of iterations is significantly reduced. We use a randomized spectral decomposition of the posterior covariance matrix of the parameters to perform a linearized uncertainty quantification of the parameter estimate. The feasibility of the method is tested by virtual examples of head observations in steady-state and transient groundwater flow. These synthetic tests demonstrate that transient data can reduce both parameter uncertainty and time spent conducting experiments, while the presented methods are able to handle the resulting large number of measurements.}
+}
+@article{dietrich1997fast,
+  title={Fast and exact simulation of stationary Gaussian processes through circulant embedding of the covariance matrix},
+  author={Dietrich, Claude R and Newsam, Garry N},
+  journal={SIAM Journal on Scientific Computing},
+  volume={18},
+  number={4},
+  pages={1088--1107},
+  year={1997},
+  publisher={SIAM}
+}
+@article{graham2018analysis,
+  title={Analysis of circulant embedding methods for sampling stationary random fields},
+  author={Graham, Ivan G and Kuo, Frances Y and Nuyens, Dirk and Scheichl, Robert and Sloan, Ian H},
+  journal={SIAM Journal on Numerical Analysis},
+  volume={56},
+  number={3},
+  pages={1871--1895},
+  year={2018},
+  publisher={SIAM}
+}
+@misc{parafields-core,
+  author={Klein, Ole and Kempf, Dominic},
+  year={2023},
+  publisher={GitHub},
+  journal={GitHub repository},
+  url={https://github.com/parafields/parafields-core}
+}
+@article{mpi4py,
+  author={Dalcin, Lisandro and Fang, Yao-Lung L.},
+  journal={Computing in Science & Engineering}, 
+  title={mpi4py: Status Update After 12 Years of Development}, 
+  year={2021},
+  volume={23},
+  number={4},
+  pages={47-54},
+  doi={10.1109/MCSE.2021.3083216}
+}
+@article{numpy,
+ title         = {Array programming with {NumPy}},
+ author        = {Charles R. Harris and K. Jarrod Millman and St{\'{e}}fan J.
+                 van der Walt and Ralf Gommers and Pauli Virtanen and David
+                 Cournapeau and Eric Wieser and Julian Taylor and Sebastian
+                 Berg and Nathaniel J. Smith and Robert Kern and Matti Picus
+                 and Stephan Hoyer and Marten H. van Kerkwijk and Matthew
+                 Brett and Allan Haldane and Jaime Fern{\'{a}}ndez del
+                 R{\'{i}}o and Mark Wiebe and Pearu Peterson and Pierre
+                 G{\'{e}}rard-Marchant and Kevin Sheppard and Tyler Reddy and
+                 Warren Weckesser and Hameer Abbasi and Christoph Gohlke and
+                 Travis E. Oliphant},
+ year          = {2020},
+ month         = sep,
+ journal       = {Nature},
+ volume        = {585},
+ number        = {7825},
+ pages         = {357--362},
+ doi           = {10.1038/s41586-020-2649-2},
+ publisher     = {Springer Science and Business Media {LLC}},
+ url           = {https://doi.org/10.1038/s41586-020-2649-2}
+}
+@article{dune,
+title = {The Dune framework: Basic concepts and recent developments},
+journal = {Computers & Mathematics with Applications},
+volume = {81},
+pages = {75-112},
+year = {2021},
+note = {Development and Application of Open-source Software for Problems with Numerical PDEs},
+issn = {0898-1221},
+doi = {https://doi.org/10.1016/j.camwa.2020.06.007},
+url = {https://www.sciencedirect.com/science/article/pii/S089812212030256X},
+author = {Peter Bastian and Markus Blatt and Andreas Dedner and Nils-Arne Dreier and Christian Engwer and René Fritze and Carsten Gräser and Christoph Grüninger and Dominic Kempf and Robert Klöfkorn and Mario Ohlberger and Oliver Sander},
+abstract = {This paper presents the basic concepts and the module structure of the Distributed and Unified Numerics Environment and reflects on recent developments and general changes that happened since the release of the first Dune version in 2007 and the main papers describing that state Bastian etal. (2008a, 2008b). This discussion is accompanied with a description of various advanced features, such as coupling of domains and cut cells, grid modifications such as adaptation and moving domains, high order discretizations and node level performance, non-smooth multigrid methods, and multiscale methods. A brief discussion on current and future development directions of the framework concludes the paper.}
+}
+@misc{pybind11,
+   author = {Wenzel Jakob and Jason Rhinelander and Dean Moldovan},
+   year = {2017},
+   note = {https://github.com/pybind/pybind11},
+   title = {pybind11 -- Seamless operability between C++11 and Python}
+}
+@misc{dune-randomfield,
+   author = {Ole Klein},
+   year = {2017},
+   note = {https://gitlab.dune-project.org/oklein/dune-randomfield},
+   title = {dune-randomfield - Generation of Gaussian random fields in arbitrary dimensions, based on circulant embedding}
+}
+@misc{fakempi,
+   author = {Dominic Kempf and the PetSc Developers},
+   year = {2022},
+   note = {https://github.com/ssciwr/FakeMPI},
+   title = {FakeMPI - a sequential MPI stub}
+}
+@misc{scikit-build,
+  author       = {Jean-Christophe Fillion-Robin and
+                  Matt McCormick and
+                  Omar Padron and
+                  Max Smolens and
+                  Michael Grauer and
+                  Michael Sarahan},
+  title        = {{jcfr/scipy\_2018\_scikit-build\_talk: SciPy 2018 Talk 
+                   | scikit-build: A Build System Generator for
+                   CPython C/C++/Fortran/Cython Extensions}},
+  month        = jul,
+  year         = 2018,
+  publisher    = {Zenodo},
+  version      = {v1.0},
+  doi          = {10.5281/zenodo.2565368},
+  url          = {https://doi.org/10.5281/zenodo.2565368}
+}

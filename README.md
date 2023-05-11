@@ -59,6 +59,13 @@ Additionally, `parafields` defines the following optional dependency sets:
 
 These optional dependencies can be installed by installing e.g. `parafields[jupyter]`.
 
+## Contributing
+
+Parafields welcomes contributions. In order to maximize the chances of your contribution
+to be considered, we ask you to [open an issue](https://github.com/parafields/parafields/issues)
+before starting implementation work. This allows us to discuss the software design and
+potentially required refactorings beforehand.
+
 ## Acknowledgments
 
 The [parafields-core C++ library](https://github.com/parafields/parafields-core) is
