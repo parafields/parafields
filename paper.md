@@ -17,13 +17,23 @@ authors:
   - name: Ole Klein
     orcid: 0000-0002-3295-7347
     equal-contrib: true
+    affiliation: 4
   - name: Robert Kutri
+    affiliation: "2, 3"
+  - name: Robert Scheichl
+    affiliation: "2, 3"
+    orcid: 0000-0001-8493-4393
+  - name: Peter Bastian
     affiliation: 2
 affiliations:
  - name: Scientific Software Center, Heidelberg University
    index: 1
  - name: Interdisciplinary Center for Scientific Computing, Heidelberg University
    index: 2
+ - name: Institute for Mathematics, Heidelberg University
+   index: 3
+ - name: Independent Researcher
+   index: 4
 date: 11 May 2023
 bibliography: paper.bib
 ---
