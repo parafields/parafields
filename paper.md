@@ -44,7 +44,7 @@ C++ backend library and exposed in Python though an intuitive Python interface.
 
 *This should summarize why we need this piece of research software, including naming competitors*
 
-Circulant embedding references: [@dietrich1997fast], [@graham2018analysis].
+Circulant embedding references: [@dietrich1997fast], [@graham2018analysis], [@chan1999simulation].
 Original work: [@KLEIN2017161]
 
 # Implementation
