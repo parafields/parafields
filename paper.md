@@ -52,10 +52,22 @@ C++ backend library and exposed in Python though an intuitive Python interface.
 
 # Statement of need
 
-*This should summarize why we need this piece of research software, including naming competitors*
+The simulation of large-scale Gaussian random fields is a computationally
+challenging task, in particular if the considered field has a short correlation
+length when compared to its computational domain. 
 
-Circulant embedding references: [@dietrich1997fast], [@graham2018analysis], [@chan1999simulation].
-Original work: [@KLEIN2017161]
+However, when the random field in question is stationary, that is, its covariance
+function is translation invariant, fast and exact methods of simulation based on the
+Fast Fourier Transform have been proposed in [@dietrich1997fast] and 
+[wood1994simulation]. These can outperform more traditional, factorisation-based 
+both, in terms of scaling as well as absolute performance.
+
+Through the combination of an efficient C++ backend
+with an easy-to-use Python interface this package aims to make these methods accessible
+for integration into existing workflows. This separation also allows the package
+to support both large-scale, peformance-oriented applications, as well as providing
+a means to quickly generate working prototypes using just a few lines.
+
 
 # Implementation
 
@@ -78,9 +90,6 @@ In order to embed perfectly into existing user workflows, the Python API is enti
 Furthermore, we acknowledge the fact that many Python users write scientific applications within Jupyter: Our fields render nicely as images in Jupyter and field generation can optionally be configured
 through an interactive widget frontend within Jupyter.
 
-# Applications
-
-*This could either be a single research application using this or a description of the problem class being solved with this*
 
 # Acknowledgments
 
