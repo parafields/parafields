@@ -55,12 +55,12 @@ C++ backend library and exposed in Python though an intuitive Python interface.
 
 The simulation of large-scale Gaussian random fields is a computationally
 challenging task, in particular if the considered field has a short correlation
-length when compared to its computational domain. 
+length when compared to its computational domain.
 
 However, when the random field in question is stationary, that is, its covariance
 function is translation invariant, fast and exact methods of simulation based on the
-Fast Fourier Transform have been proposed in [@dietrich1997fast] and 
-[wood1994simulation]. These can outperform more traditional, factorisation-based 
+Fast Fourier Transform have been proposed in [@dietrich1997fast] and
+[wood1994simulation]. These can outperform more traditional, factorisation-based
 both, in terms of scaling as well as absolute performance.
 
 Through the combination of an efficient C++ backend
