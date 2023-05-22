@@ -60,8 +60,8 @@ length when compared to its computational domain.
 However, when the random field in question is stationary, that is, its covariance
 function is translation invariant, fast and exact methods of simulation based on the
 Fast Fourier Transform have been proposed in [@dietrich1997fast] and
-[wood1994simulation]. These can outperform more traditional, factorisation-based
-both, in terms of scaling as well as absolute performance.
+[@wood1994simulation]. These can outperform more traditional, factorisation-based
+methods both, in terms of scaling as well as absolute performance.
 
 Through the combination of an efficient C++ backend
 with an easy-to-use Python interface this package aims to make these methods accessible
