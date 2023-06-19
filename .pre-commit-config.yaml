@@ -47,14 +47,14 @@ repos:
 
   # Check Configuration as Code files for integrations
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.23.1
+    rev: 0.23.2
     hooks:
       - id: check-github-workflows
      # - id: check-readthedocs
 
   # Format C++ code with Clang-Format - automatically applying the changes
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v16.0.4
+    rev: v16.0.6
     hooks:
       - id: clang-format
         args:
