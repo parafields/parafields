@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checking out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Installing system dependencies
         if: matrix.parallel == 'ON' && runner.os == 'Linux'
@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Checking out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Installing system dependencies
         run: |
