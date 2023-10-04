@@ -21,7 +21,7 @@ jobs:
             arch: "x86"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Build wheels (arch=${{ matrix.arch }})
       uses: pypa/cibuildwheel@v2.15
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install MPI
         run: |
@@ -65,7 +65,7 @@ jobs:
           - bundled
           - system
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install MPI
         run: |
