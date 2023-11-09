@@ -70,6 +70,11 @@ for integration into existing workflows. This separation also allows the package
 to support both large-scale, peformance-oriented applications, as well as providing
 a means to quickly generate working prototypes using just a few lines.
 
+Other packages for the generation of stationary Gaussian processes exist, like e.g. the R package lgcp [@davies2013lgcp],
+the Julia package GaussianRandomFields.jl [@robbe2023grfjl] or the Python package GSTools [@mueller2022gstools].
+In comparison with these alternative packages, parafields provides a rich feature set
+and the unique possibility to create Gaussian processes in a an MPI-distributed fashion.
+
 # Implementation
 
 Parafields looks back at over ten years of development history: It was first implemented as an extension to the
