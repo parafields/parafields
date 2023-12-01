@@ -100,7 +100,9 @@ jobs:
   upload_pypi:
     needs: [build-sdist, build-wheels, test-sdist]
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'parafields'
+    permissions:
+      id-token: write
+
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -108,7 +110,3 @@ jobs:
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          verbose: true
