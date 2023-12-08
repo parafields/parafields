@@ -70,7 +70,7 @@ This is an example of such function that generates a striped topology:
     field = parafields.generate_field(partitioning=striped_partitioning)
 
 It should be noted that there are some constraints to the partitioning process
-that arise from the internal workings of the FFTW library. 
+that arise from the internal workings of the FFTW library.
 
 * The number of cells in X direction should be divisible by the number of processors.
 * As FFTW will internally always work with a striped partitioning.
