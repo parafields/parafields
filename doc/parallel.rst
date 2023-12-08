@@ -32,7 +32,8 @@ only that the evaluation returns only the part relevant on the current rank:
     field = parafields.generate_field(
         cells=(256, 256), extensions=(1.0, 1.0), covariance="exponential", variance=1.0
     )
-    print(field.shape)
+    evaluation = field.evaluate()
+    print(evaluation.shape)
 
     // Run with 4 processors, this will print (128, 128) on each rank.
 
