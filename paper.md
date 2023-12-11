@@ -41,11 +41,17 @@ bibliography: paper.bib
 
 # Summary
 
-Parafields is a Python package for the generation of stationary Gaussian random fields (also referred to as Gaussian
-processes)
-with well-defined, known statistical properties. The use of such fields is a key ingredient of simulation
-workflows that involve uncertain, spatially heterogeneous parameters. Application areas include
-e.g. soil physics, computer graphics and material sciences.
+Parafields is a Python package for the generation of stationary Gaussian random
+fields with well-defined, known statistical properties. The use of such fields
+is a key ingredient of simulation workflows that involve uncertain, spatially
+heterogeneous parameters. As such, Gaussian Random Fields play a dominant role
+in geostatistics, e.g.~in the modelling of particulate matter concentration,
+temperature distributions and subsurface flow
+[@cameletti2013spatio][@sain2011spatial][@dodwell2015hierarchical]. Outside
+these traditional applications, Gaussian random fields are also
+used in biomedical imaging [@penny2005bayesian],
+material sciences[@torquato2002random] or within Markov-Chain Monte-Carlo methods
+in Bayesian estimation[@scheichl2017quasi].
 
 Parafields is also able to run in parallel using the Message Passing Interface (MPI) standard through mpi4py [@mpi4py].
 In this case, the computational domain is split and only the part of the random field relevant
@@ -55,13 +61,13 @@ C++ backend library and exposed in Python though an intuitive Python interface.
 # Statement of need
 
 The simulation of large-scale Gaussian random fields is a computationally
-challenging task, in particular if the considered field has a short correlation
+challenging task, particularly if the considered field has a short correlation
 length when compared to its computational domain.
 
 However, when the random field in question is stationary, that is, its covariance
 function is translation invariant, fast and exact methods of simulation based on the
 Fast Fourier Transform have been proposed in [@dietrich1997fast] and
-[@wood1994simulation]. These can outperform more traditional, factorisation-based
+[@wood1994simulation]. These can outperform more traditional, factorization-based
 methods both in terms of scaling as well as absolute performance.
 
 Through the combination of an efficient C++ backend
@@ -72,8 +78,14 @@ a means to quickly generate working prototypes using just a few lines.
 
 Other packages for the generation of stationary Gaussian processes exist, like e.g. the R package lgcp [@davies2013lgcp],
 the Julia package GaussianRandomFields.jl [@robbe2023grfjl] or the Python package GSTools [@mueller2022gstools].
-In comparison with these alternative packages, parafields provides a rich feature set
-and the unique possibility to create Gaussian processes in a an MPI-distributed fashion.
+In comparison with these alternative packages, parafields is specifically
+designed and adapted to the sampling of very large Gaussian random fields
+within a HPC workflow. This was a major concern in the development of the backend
+and is among other things, reflected in the possibility to create Gaussian processes in a an
+MPI-distributed fashion.
+
+
+
 
 # Implementation
 
@@ -85,14 +97,12 @@ e.g. included a rewrite of the CMake build system [@parafields-core]. In order t
 
 When engineering the Python package, we put special emphasis on the following usability aspects: Installability, customizability and embedding into existing user workflows.
 
-The recommended installation procedure for parafields is perfectly aligned with the state-of-the-art of the Python language: It is installable through `pip` and automatically compiles using the CMake build systen of the project through scikit-build [@scikit-build]. Required dependencies of the C++ library are automatically fetched and built in the required configuration. For sequential usage we also provide
+The recommended installation procedure for parafields is perfectly aligned with the state-of-the-art of the Python language: It is installable through `pip` and automatically compiles using the CMake build system of the project through scikit-build [@scikit-build]. Required dependencies of the C++ library are automatically fetched and built in the required configuration. For sequential usage we also provide
 pre-compiled Python wheels. They are built against the sequential MPI stub library FakeMPI [@fakempi], which allows us to build the sequential and the parallel version from the same code base. Users that want to leverage MPI through mpi4py will instead build the package from source against their system MPI library.
 
 It was a goal of the design of the Python API to expose as much of the flexibility of the underlying C++ framework as possible.
 In order to do so, we use pybind11's capabilities to pass Python callables to the C++ backend.
 This allows users to e.g. implement custom covariance functions or use different random number generators.
-
-In order to embed perfectly into existing user workflows, the Python API is entirely based on numpy arrays [@numpy].
 Furthermore, we acknowledge the fact that many Python users write scientific applications within Jupyter: Our fields render nicely as images in Jupyter and field generation can optionally be configured
 through an interactive widget frontend within Jupyter.
 
