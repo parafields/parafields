@@ -45,7 +45,7 @@ Parafields is a Python package for the generation of stationary Gaussian random
 fields with well-defined, known statistical properties. The use of such fields
 is a key ingredient of simulation workflows that involve uncertain, spatially
 heterogeneous parameters. As such, Gaussian Random Fields play a dominant role
-in geostatistics, e.g.~in the modelling of particulate matter concentration,
+in geostatistics, e.g. in the modelling of particulate matter concentration,
 temperature distributions and subsurface flow
 [@cameletti2013spatio][@sain2011spatial][@dodwell2015hierarchical]. Outside
 these traditional applications, Gaussian random fields are also
