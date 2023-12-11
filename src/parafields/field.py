@@ -477,23 +477,23 @@ class RandomField:
 
         if MPI is not None:
             # We use COMM_WORLD as the default communicator if running in parallel
-            if comm is None:
+            if self._comm is None:
                 self._comm = MPI.COMM_WORLD
             # If the given partitioning is a function, call it
             if isinstance(partitioning, collections.abc.Callable):
                 partitioning = partitioning(
-                    MPI.COMM_WORLD.size, self.config["grid"]["cells"]
+                    self._comm.size, self.config["grid"]["cells"]
                 )
 
         # Instantiate a C++ class for the field generator
         dim = len(self.config["grid"]["extensions"])
         FieldType = getattr(_parafields, f"RandomField{dim}D_{available_types[dtype]}")
 
-        if comm is None:
+        if self._comm is None:
             self._field = FieldType(dict_to_parameter_tree(self.config))
         else:
             self._field = FieldType(
-                dict_to_parameter_tree(self.config), list(partitioning), comm
+                dict_to_parameter_tree(self.config), list(partitioning), self._comm
             )
 
         # Marker whether the field has been generated

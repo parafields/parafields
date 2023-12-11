@@ -25,14 +25,6 @@ The following options are supported in the backend but not yet in the Python bin
   sign function (excursion set)
 * Coarsening and refinement of random fields for multigrid/-scale methods
 
-## Usage
-
-This is a minimal usage example of the `parafields` package:
-
-![Minimum usage example](https://raw.githubusercontent.com/parafields/parafields/main/parafields.gif)
-
-For more examples, check out the [parafields documentation](https://parafields.readthedocs.io/).
-
 ## Installation
 
 `parafields` is available from PyPI and can be installed using `pip`:
@@ -59,12 +51,51 @@ Additionally, `parafields` defines the following optional dependency sets:
 
 These optional dependencies can be installed by installing e.g. `parafields[jupyter]`.
 
+## Usage
+
+This is a minimal usage example of the `parafields` package:
+
+![Minimum usage example](https://raw.githubusercontent.com/parafields/parafields/main/parafields.gif)
+
+For more examples, check out the [parafields documentation](https://parafields.readthedocs.io/).
+
+## Reporting Issues
+
+If you need support with `parafields` or found a bug, consider a bug on
+[the issue tracker](https://github.com/parafields/parafields/issues).
+
 ## Contributing
 
-Parafields welcomes contributions. In order to maximize the chances of your contribution
-to be considered, we ask you to [open an issue](https://github.com/parafields/parafields/issues)
-before starting implementation work. This allows us to discuss the software design and
-potentially required refactorings beforehand.
+`parafields` welcomes external contributions. For the best possible contributor
+experience, consider opening an issue on [the issue tracker](https://github.com/parafields/parafields/issues)
+before you start developing. Announcing your intended development in this way allows us to clarify
+whether it is in the scope of the package. Contributions are then done via a pull
+request on the GitHub repository. Please also add your name to the list of copyright holders.
+
+For a development installation of `parafields`, use the following instructions:
+
+```bash
+git clone https://github.com/parafields/parafields.git
+cd parafields
+python -m pip install -v --editable .[tests,docs,jupyter]
+```
+
+Before contributing, make sure that the unit tests pass and that new functionality is
+covered by unit tests. The unit tests can be run using pytest:
+
+```bash
+# Sequential tests
+python -m pytest
+
+# Parallel tests
+mpirun --oversubscribe -np 4 python -m pytest --only-mpi
+```
+
+In order to locally build the Sphinx documentation, use the following commands:
+
+```bash
+sphinx-build -t html ./doc ./html
+```
 
 ## Acknowledgments
 
