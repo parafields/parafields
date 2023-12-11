@@ -3,7 +3,7 @@
 # introduce pyproject.toml
 [build-system]
 requires = [
-    "setuptools>=61,<64",
+    "setuptools",
     "wheel",
     "scikit-build",
     "cmake>=3.20",
