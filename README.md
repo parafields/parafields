@@ -15,7 +15,7 @@ based on circulant embedding. Core features are:
 * Uses `numpy` data structures to ease integration with the
   Python ecosystem of scientific software
 * Optional caching of matrix-vector products
-* Easy integration into [FEniCSx-based](https://fenicsproject.org) PDE solvers ([Example](https://github.com/parafields/parafields/blob/main/jupyter/fenicsx.ipynb))
+* Easy integration into e.g. [FEniCSx-based](https://fenicsproject.org) PDE solvers ([Example that is currently not tested as part of our CI](https://github.com/parafields/parafields/blob/main/jupyter/fenicsx.ipynb))
 
 `parafields` implements these features through Python bindings to the [parafields-core C++ library](https://github.com/parafields/parafields-core).
 The following options are supported in the backend but not yet in the Python bindings:
