@@ -17,8 +17,6 @@ jobs:
             arch: "x86_64"
           - os: windows-2019
             arch: "AMD64"
-          - os: windows-2019
-            arch: "x86"
 
     steps:
     - uses: actions/checkout@v4
