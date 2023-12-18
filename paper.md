@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "parafields: A generator for distributed, stationary Gaussian processes"
 tags:
   - Python
   - MPI
