@@ -12,7 +12,7 @@ keywords = {Inverse modeling, Geostatistical inversion, Uncertainty quantificati
 abstract = {In the geostatistical inverse problem of subsurface hydrology, continuous hydraulic parameter fields, in most cases hydraulic conductivity, are estimated from measurements of dependent variables, such as hydraulic heads, under the assumption that the parameter fields are autocorrelated random space functions. Upon discretization, the continuous fields become large parameter vectors with O(104−107) elements. While cokriging-like inversion methods have been shown to be efficient for highly resolved parameter fields when the number of measurements is small, they require the calculation of the sensitivity of each measurement with respect to all parameters, which may become prohibitive with large sets of measured data such as those arising from transient groundwater flow. We present a Preconditioned Conjugate Gradient method for the geostatistical inverse problem, in which a single adjoint equation needs to be solved to obtain the gradient of the objective function. Using the autocovariance matrix of the parameters as preconditioning matrix, expensive multiplications with its inverse can be avoided, and the number of iterations is significantly reduced. We use a randomized spectral decomposition of the posterior covariance matrix of the parameters to perform a linearized uncertainty quantification of the parameter estimate. The feasibility of the method is tested by virtual examples of head observations in steady-state and transient groundwater flow. These synthetic tests demonstrate that transient data can reduce both parameter uncertainty and time spent conducting experiments, while the presented methods are able to handle the resulting large number of measurements.}
 }
 @article{dietrich1997fast,
-  title={Fast and exact simulation of stationary Gaussian processes through circulant embedding of the covariance matrix},
+  title={Fast and exact simulation of stationary {G}aussian processes through circulant embedding of the covariance matrix},
   author={Dietrich, Claude R and Newsam, Garry N},
   journal={SIAM Journal on Scientific Computing},
   volume={18},
@@ -34,6 +34,7 @@ abstract = {In the geostatistical inverse problem of subsurface hydrology, conti
   doi={10.1137/17m1149730}
 }
 @misc{parafields-core,
+  title={{parafields-core}},
   author={Klein, Ole and Kempf, Dominic},
   year={2022},
   publisher={GitHub},
@@ -89,13 +90,13 @@ abstract = {This paper presents the basic concepts and the module structure of t
    author = {Wenzel Jakob and Jason Rhinelander and Dean Moldovan},
    year = {2017},
    note = {https://github.com/pybind/pybind11},
-   title = {pybind11 -- Seamless operability between C++11 and Python}
+   title = {pybind11 -- Seamless operability between {C}++11 and {P}ython}
 }
 @misc{dune-randomfield,
    author = {Ole Klein},
    year = {2017},
    note = {https://gitlab.dune-project.org/oklein/dune-randomfield},
-   title = {dune-randomfield - Generation of Gaussian random fields in arbitrary dimensions, based on circulant embedding}
+   title = {dune-randomfield - Generation of {G}aussian random fields in arbitrary dimensions, based on circulant embedding}
 }
 @misc{fakempi,
    author = {Dominic Kempf and the PetSc Developers},
@@ -110,9 +111,9 @@ abstract = {This paper presents the basic concepts and the module structure of t
                   Max Smolens and
                   Michael Grauer and
                   Michael Sarahan},
-  title        = {{jcfr/scipy\_2018\_scikit-build\_talk: SciPy 2018 Talk
-                   | scikit-build: A Build System Generator for
-                   CPython C/C++/Fortran/Cython Extensions}},
+  title        = {{jcfr/scipy\_2018\_scikit-build\_talk}: {SciPy} 2018 Talk
+                   | {scikit-build}: A Build System Generator for
+                   {CPython C/C++/Fortran/Cython} Extensions},
   month        = jul,
   year         = 2018,
   publisher    = {Zenodo},
@@ -121,7 +122,7 @@ abstract = {This paper presents the basic concepts and the module structure of t
   url          = {https://doi.org/10.5281/zenodo.2565368}
 }
 @article{wood1994simulation,
-  title={Simulation of stationary Gaussian processes in [0, 1] d},
+  title={Simulation of stationary {G}aussian processes in [0, 1] d},
   author={Wood, Andrew TA and Chan, Grace},
   journal={Journal of computational and graphical statistics},
   volume={3},
@@ -131,8 +132,9 @@ abstract = {This paper presents the basic concepts and the module structure of t
   publisher={Taylor \& Francis},
   doi={10.2307/1390903}
 }
+
 @article{davies2013lgcp,
- title={On Circulant Embedding for Gaussian Random Fields in R},
+ title={On Circulant Embedding for {G}aussian Random Fields in {R}},
  volume={55},
  url={https://www.jstatsoft.org/index.php/jss/article/view/v055i09},
  doi={10.18637/jss.v055.i09},
@@ -143,10 +145,23 @@ abstract = {This paper presents the basic concepts and the module structure of t
  year={2013},
  pages={1–21}
 }
-@article{robbe2023grfjl, doi = {10.21105/joss.05595}, url = {https://doi.org/10.21105/joss.05595}, year = {2023}, publisher = {The Open Journal}, volume = {8}, number = {89}, pages = {5595}, author = {Pieterjan Robbe}, title = {GaussianRandomFields.jl: A Julia package to generate and sample from Gaussian random fields}, journal = {Journal of Open Source Software} }
+
+@article{robbe2023grfjl,
+doi = {10.21105/joss.05595},
+url = {https://doi.org/10.21105/joss.05595},
+year = {2023},
+publisher = {The Open Journal},
+volume = {8},
+number = {89},
+pages = {5595},
+author = {Pieterjan Robbe}, 
+title = {GaussianRandomFields.jl: A {J}ulia package to generate and sample from {G}aussian random fields},
+journal = {Journal of Open Source Software}
+}
+
 @Article{mueller2022gstools,
 AUTHOR = {M\"uller, S. and Sch\"uler, L. and Zech, A. and He{\ss}e, F.},
-TITLE = {\texttt{GSTools} v1.3: a toolbox for geostatistical modelling in Python},
+TITLE = {\texttt{GSTools} v1.3: a toolbox for geostatistical modelling in {P}ython},
 JOURNAL = {Geoscientific Model Development},
 VOLUME = {15},
 YEAR = {2022},
@@ -183,7 +198,7 @@ DOI = {10.5194/gmd-15-3161-2022}
 
 
 @article{dodwell2015hierarchical,
-  title={A hierarchical multilevel Markov chain Monte Carlo algorithm with applications to uncertainty quantification in subsurface flow},
+  title={A hierarchical multilevel {M}arkov chain {M}onte {C}arlo algorithm with applications to uncertainty quantification in subsurface flow},
   author={Dodwell, Tim J and Ketelsen, Christian and Scheichl, Robert and Teckentrup, Aretha L},
   journal={SIAM/ASA Journal on Uncertainty Quantification},
   volume={3},
@@ -223,7 +238,7 @@ DOI = {10.5194/gmd-15-3161-2022}
 
 
 @article{scheichl2017quasi,
-  title={Quasi-Monte Carlo and multilevel Monte Carlo methods for computing posterior expectations in elliptic inverse problems},
+  title={Quasi-Monte Carlo and multilevel {M}onte {C}arlo methods for computing posterior expectations in elliptic inverse problems},
   author={Scheichl, Robert and Stuart, Andrew M and Teckentrup, Aretha L},
   journal={SIAM/ASA Journal on Uncertainty Quantification},
   volume={5},
