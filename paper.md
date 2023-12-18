@@ -27,13 +27,13 @@ authors:
   - name: Peter Bastian
     affiliation: 2
 affiliations:
- - name: Scientific Software Center, Heidelberg University
+ - name: Scientific Software Center, Heidelberg University, Heidelberg, Germany
    index: 1
- - name: Interdisciplinary Center for Scientific Computing, Heidelberg University
+ - name: Interdisciplinary Center for Scientific Computing, Heidelberg University, Heidelberg, Germany
    index: 2
- - name: Institute for Mathematics, Heidelberg University
+ - name: Institute for Mathematics, Heidelberg University, Heidelberg, Germany
    index: 3
- - name: Independent Researcher
+ - name: Independent Researcher, Heidelberg, Germany
    index: 4
 date: 11 May 2023
 bibliography: paper.bib
