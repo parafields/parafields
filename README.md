@@ -4,6 +4,7 @@
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/parafields/parafields/ci.yml?branch=main)](https://github.com/parafields/parafields/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/parafields/badge/)](https://parafields.readthedocs.io/)
 [![codecov](https://codecov.io/gh/parafields/parafields/branch/main/graph/badge.svg)](https://codecov.io/gh/parafields/parafields)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05735/status.svg)](https://doi.org/10.21105/joss.05735)
 
 `parafields` is a Python package that provides Gaussian random fields
 based on circulant embedding. Core features are:
