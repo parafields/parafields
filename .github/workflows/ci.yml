@@ -111,14 +111,14 @@ jobs:
           lcov_cobertura coverage.info -o coverage2.xml
 
       - name: Upload C++ coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
           files: ./coverage2.xml
           verbose: true
 
       - name: Upload Python coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
           files: ./test/coverage.xml
