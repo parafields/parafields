@@ -3,7 +3,7 @@ import io
 import jsonschema
 import matplotlib.pyplot as plt
 import numpy as np
-import parafields._parafields as _parafields
+import _parafields
 import time
 
 from matplotlib import cm

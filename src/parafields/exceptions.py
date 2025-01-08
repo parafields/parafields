@@ -1,2 +1,2 @@
 # Import custom exception types
-from parafields._parafields import NegativeEigenvalueError
+from _parafields import NegativeEigenvalueError
