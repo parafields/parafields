@@ -43,7 +43,15 @@ pybind11_add_module(_parafields src/parafields/_parafields.cpp)
 target_link_libraries(_parafields PUBLIC parafields::parafields
                                          pybind11::pybind11)
 target_include_directories(_parafields PUBLIC ${PROJECT_SOURCE_DIR}/include)
-if(MPI4PY_INCLUDE_DIR)
+
+# Determine whether we have mpi4py
+execute_process(
+  COMMAND ${Python_EXECUTABLE} -c
+          "import mpi4py; print(mpi4py.get_include(), end='')"
+  RESULT_VARIABLE RESULT_PRESENT
+  OUTPUT_VARIABLE MPI4PY_INCLUDE_DIR
+  ERROR_QUIET)
+if(RESULT_PRESENT STREQUAL "0")
   target_include_directories(_parafields PUBLIC ${MPI4PY_INCLUDE_DIR})
 endif()
 
