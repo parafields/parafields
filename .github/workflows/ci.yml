@@ -106,18 +106,10 @@ jobs:
       - name: Collect C++ coverage report
         run: |
           lcov --directory build --capture --output-file coverage.info --ignore-errors mismatch
-          lcov_cobertura coverage.info -o coverage2.xml
 
       - name: Upload C++ coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
-          files: ./coverage2.xml
-          verbose: true
-
-      - name: Upload Python coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          fail_ci_if_error: true
-          files: ./test/coverage.xml
+          files: ./coverage.info,./test/coverage.xml
           verbose: true

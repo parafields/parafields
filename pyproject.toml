@@ -52,7 +52,6 @@ jupyter = [
     "wrapt",
 ]
 tests = [
-    "lcov_cobertura",
     "nbval",
     "pytest",
     "pytest-cov",
