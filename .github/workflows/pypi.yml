@@ -19,7 +19,7 @@ jobs:
             arch: "AMD64"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Build wheels (arch=${{ matrix.arch }})
       uses: pypa/cibuildwheel@v2.23
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install MPI
         run: |
@@ -63,7 +63,7 @@ jobs:
           - bundled
           - system
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install MPI
         run: |
