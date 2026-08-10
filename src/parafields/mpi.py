@@ -2,7 +2,6 @@ import _parafields
 
 import math
 
-
 # Import the mpi4py MPI interface if we have it installed
 try:
     from mpi4py import MPI
