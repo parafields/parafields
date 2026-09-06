@@ -75,7 +75,7 @@ jobs:
         run: |
           sudo apt install libfftw3-dev libfftw3-mpi-dev
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: '3.9'
