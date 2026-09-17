@@ -42,7 +42,6 @@ dependencies = [
 
 [project.optional-dependencies]
 docs = [
-    "docutils<0.17",
     "ipykernel",
     "nbsphinx",
     "nbsphinx-link",
