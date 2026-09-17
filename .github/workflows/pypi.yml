@@ -21,14 +21,14 @@ jobs:
             arch: "AMD64"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Build wheels (arch=${{ matrix.arch }})
       uses: pypa/cibuildwheel@v4.2.0
       env:
         CIBW_ARCHS: "${{ matrix.arch }}"
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       with:
         name: wheels-${{ matrix.os }}-${{ matrix.arch }}
         path: ./wheelhouse/*.whl
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install MPI
         run: |
@@ -49,7 +49,7 @@ jobs:
         run: |
           pipx run build --sdist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: sdist
           path: dist/*.tar.gz
@@ -66,7 +66,7 @@ jobs:
           - bundled
           - system
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install MPI
         run: |
@@ -78,12 +78,12 @@ jobs:
         run: |
           sudo apt install libfftw3-dev libfftw3-mpi-dev
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: '3.11'
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: sdist
           path: dist
@@ -105,7 +105,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           pattern: wheels-*
           merge-multiple: true
