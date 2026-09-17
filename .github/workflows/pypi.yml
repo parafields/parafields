@@ -11,28 +11,31 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             arch: "x86_64"
-          - os: macos-12
+          - os: macos-15
+            arch: "arm64"
+          - os: macos-15-intel
             arch: "x86_64"
-          - os: windows-2019
+          - os: windows-latest
             arch: "AMD64"
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Build wheels (arch=${{ matrix.arch }})
-      uses: pypa/cibuildwheel@v2.23
+      uses: pypa/cibuildwheel@v4.2.0
       env:
         CIBW_ARCHS: "${{ matrix.arch }}"
 
     - uses: actions/upload-artifact@v4
       with:
+        name: wheels-${{ matrix.os }}-${{ matrix.arch }}
         path: ./wheelhouse/*.whl
 
   build-sdist:
     name: Build Source distribution
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +51,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: artifact
+          name: sdist
           path: dist/*.tar.gz
 
   test-sdist:
@@ -58,7 +61,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-latest
         fftw:
           - bundled
           - system
@@ -78,11 +81,11 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - uses: actions/download-artifact@v4
         with:
-          name: artifact
+          name: sdist
           path: dist
 
       - name: Install from SDist
@@ -104,7 +107,13 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: artifact
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1

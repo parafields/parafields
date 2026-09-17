@@ -20,10 +20,15 @@ readme = "README.md"
 maintainers = [
     { name = "Dominic Kempf", email = "dominic.kempf@iwr.uni-heidelberg.de" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = { text = "BSD-3" }
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Operating System :: OS Independent",
     "License :: OSI Approved :: BSD License",
 ]
@@ -91,8 +96,9 @@ before-all = "sed -i.bak 's/\"mpi4py\",//g' pyproject.toml"
 # Verbose output is helpful for understanding CI failures
 build-verbosity = 3
 
-# We restrict ourselves to recent Python versions
-skip = "pp* *p27-* cp35-* cp36-* cp37-* *musllinux*"
+# Build wheels for the supported CPython versions only.
+build = "cp31{1,2,3,4,5}-*"
+skip = "*musllinux*"
 
 # Testing commands for our wheels
 test-command = "pytest {package}/test"
