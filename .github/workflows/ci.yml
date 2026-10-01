@@ -109,7 +109,7 @@ jobs:
           lcov --directory build --capture --output-file coverage.info --ignore-errors mismatch
 
       - name: Upload C++ coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           fail_ci_if_error: true
           files: ./coverage.info,./test/coverage.xml
